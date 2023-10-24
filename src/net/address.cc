@@ -1,11 +1,11 @@
 #include"address.h"
-#include <strings.h>
+#include <cstring>
 #include <cassert>
 
 namespace ws{
     Address::Address(const char* buffer, int port){
         assert(port > 0);
-        bzero(&addr_,sizeof(addr_));
+        memset(&addr_,sizeof(addr_));
 
         addr_.sin_addr.s_addr = inet_addr(buffer);
         addr_.sin_port = htons(static_cast<uint16_t >(port));
@@ -16,7 +16,7 @@ namespace ws{
         assert(port > 0);
         bzero(&addr_,sizeof(addr_));
     
-        //addr_.sin_addr.s_addr = htonl(INADDR_ANY); 
+        // 仅提供端口号，ip地址就用127.0.0.1
         addr_.sin_addr.s_addr = inet_addr("127.0.0.1");        
         addr_.sin_port = htons(static_cast<uint16_t >(port));
         addr_.sin_family = AF_INET;

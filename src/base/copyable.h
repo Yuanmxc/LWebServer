@@ -2,8 +2,7 @@
 #define COPYABLE_H_
 
 namespace ws{
-
-    class Copyable{ // 允许复制的类
+    class Copyable{ // 作为一个基类，表示它的派生类能进行拷贝构造和拷贝赋值操作。
     };
 }
 
