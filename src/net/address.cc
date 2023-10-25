@@ -1,24 +1,33 @@
-#include"address.h"
-#include <cstring>
+#include "address.h"
+
+#include <arpa/inet.h>
+
 #include <cassert>
+#include <cstring>
+#include <stdexcept>
 
-namespace ws{
-    Address::Address(const char* buffer, int port){
-        assert(port > 0);
-        memset(&addr_,sizeof(addr_));
+namespace ws {
+Address::Address(const char *buffer, int port) : addr_{} {
+    assert(port > 0);
 
-        addr_.sin_addr.s_addr = inet_addr(buffer);
-        addr_.sin_port = htons(static_cast<uint16_t >(port));
-        addr_.sin_family = AF_INET;
+    if (inet_pton(AF_INET, buffer, &(addr_.sin_addr)) <= 0) {
+        // 处理IP地址转换失败的情况
+        throw std::runtime_error("Invalid IP address");
     }
 
-    Address::Address(int port){
-        assert(port > 0);
-        bzero(&addr_,sizeof(addr_));
-    
-        // 仅提供端口号，ip地址就用127.0.0.1
-        addr_.sin_addr.s_addr = inet_addr("127.0.0.1");        
-        addr_.sin_port = htons(static_cast<uint16_t >(port));
-        addr_.sin_family = AF_INET;
-    } 
+    addr_.sin_port = htons(static_cast<uint16_t>(port));
+    addr_.sin_family = AF_INET;
 }
+
+Address::Address(int port) : addr_{} {
+    assert(port > 0);
+
+    if (inet_pton(AF_INET, "127.0.0.1", &(addr_.sin_addr)) <= 0) {
+        // 处理IP地址转换失败的情况
+        throw std::runtime_error("Invalid IP address");
+    }
+
+    addr_.sin_port = htons(static_cast<uint16_t>(port));
+    addr_.sin_family = AF_INET;
+}
+}  // namespace ws

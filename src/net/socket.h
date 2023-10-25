@@ -1,45 +1,49 @@
 #ifndef SOCKET__H_
 #define SOCKET__H_
 
-#include"../base/havefd.h"
-#include"../base/copyable.h"
-#include"../tool/userbuffer.h"
-#include<sys/epoll.h>
-#include<sys/socket.h>
-#include<memory>
-#include<unistd.h>
-#include<fcntl.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
-namespace ws{ 
-    class Socket : public Havefd,Copyable{
-        public:
-            Socket() : Socket_fd_(socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)){
-                //SetNoblockingCLOEXEC();
-            }
-            explicit Socket(int fd) : Socket_fd_(fd){}
-            explicit Socket(const Havefd& Hf) : Socket_fd_(Hf.fd()){}
-            explicit Socket(const Havefd&& Hf) : Socket_fd_(Hf.fd()){}
+#include <memory>
 
-            virtual ~Socket() {if(Have_Close_) ::close(Socket_fd_);}
+#include "../base/copyable.h"
+#include "../base/havefd.h"
+#include "../tool/userbuffer.h"
 
-            int Close(); 
+namespace ws {
+class Socket : public Havefd, Copyable {
+   public:
+    Socket()
+        : Socket_fd_(
+              socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
+        // SetNoblockingCLOEXEC();
+    }
+    explicit Socket(int fd) : Socket_fd_(fd) {}
+    explicit Socket(const Havefd &Hf) : Socket_fd_(Hf.fd()) {}
+    explicit Socket(const Havefd &&Hf) : Socket_fd_(Hf.fd()) {}
 
-            int fd() const noexcept override {return Socket_fd_; }
-            int SetNoblocking(int flag = 0);
-            int SetNoblockingCLOEXEC(){
-                return Socket::SetNoblocking(O_CLOEXEC);
-            }
+    virtual ~Socket() {
+        if (Have_Close_) ::close(Socket_fd_);
+    }
 
-            int Read(char* Buffer, int Length, int flag = 0);
-            int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
+    int Close();
 
-            int Write(char* Buffer, int length, int flag = 0);
-            //int Read(...)
+    int fd() const noexcept override { return Socket_fd_; }
+    int SetNoblocking(int flag = 0);
+    int SetNoblockingCLOEXEC() { return Socket::SetNoblocking(O_CLOEXEC); }
 
-        private:
-            bool Have_Close_ = true;
-            int Socket_fd_;
-    };
-}
+    int Read(char *Buffer, int Length, int flag = 0);
+    int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
+
+    int Write(char *Buffer, int length, int flag = 0);
+    // int Read(...)
+
+   private:
+    bool Have_Close_ = true;
+    int Socket_fd_;
+};
+}  // namespace ws
 
 #endif
