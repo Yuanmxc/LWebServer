@@ -1,7 +1,12 @@
 #include "fileappend.h"
 
+#include <assert.h>
+
+#include "logging.h"
 namespace ws {
+
 namespace detail {
+
 FileAppend::FileAppend(const std::string& filename)
     : fp_(::fopen(filename.c_str(), "ae")), writtenBytes_(0) {
     assert(fp_);
@@ -12,7 +17,7 @@ void FileAppend::append(const char* logline, size_t len) {
     size_t n = Write(logline, len);
     size_t remain = len - n;
     while (remain > 0) {  // 写入不完全的情况
-        size_t x = write(logline + n, remain);
+        size_t x = Write(logline + n, remain);
         if (x == 0) {
             int err = ferror(fp_);
             if (err) {  // 写入出错的时候可以使用ferror检查 非零出错

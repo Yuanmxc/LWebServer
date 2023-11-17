@@ -8,7 +8,6 @@
 #include <string>
 
 #include "../../base/nocopy.h"
-#include "basebuffer.h"
 
 namespace ws {
 
@@ -31,10 +30,11 @@ class FixedBuffer : public Nocopy {
     uint32_t avail() const { return Length() - Spot; }
     void add(uint32_t len) { Spot += len; }
     void setSpotBegin() { Spot = 0; }
-    char* current() const { return std::advance(Buffer_.get(), Spot); }
+    char* current() const { return Buffer_.get() + Spot; }
     const char* data() const { return Buffer_.get(); }
     void setZero() { memset(Buffer_.get(), 0, BufferSize); }
-    std::string toString() { return std::string(Buffer_.get(), Spot); }
+    void reset() { Spot = 0; }
+    std::string toString() const { return std::string(Buffer_.get(), Spot); }
 
     void append(const char* buf, size_t len) {
         if (avail() > len) {

@@ -13,8 +13,10 @@
 #include "../../base/nocopy.h"
 
 namespace ws {
+
 namespace detail {
-class FileAppend : noncopyable {
+
+class FileAppend : public Nocopy {
    public:
     explicit FileAppend(const std::string& filename);
     void append(const char* logline, size_t len);

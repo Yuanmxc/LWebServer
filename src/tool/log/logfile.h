@@ -22,8 +22,8 @@ class logfile : public Nocopy {
 
    private:
     void append_unlocked(const char* logline, int len);
-    static string getLogFileName(const string& basename, time_t* now);
-    const string basename_;
+    static std::string getlogfileName(const std::string& basename, time_t* now);
+    const std::string basename_;
     const off_t rollSize_;
     const int flushInterval_;
     const int checkEveryN_;

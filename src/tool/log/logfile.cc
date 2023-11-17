@@ -4,24 +4,24 @@
 #include <time.h>
 
 #include <cstdio>
+#include <string>
 
 namespace ws {
 
 namespace detail {
-LogFile::LogFile(const string &basename, off_t rollSize, bool threadSafe,
+logfile::logfile(const std::string &basename, off_t rollSize, bool threadSafe,
                  int flushInterval, int checkEveryN)
     : basename_(basename),
       rollSize_(rollSize),
       flushInterval_(flushInterval),
       checkEveryN_(checkEveryN),
       count_(0),
-      mutex_(threadSafe ? new std::mutex() : NULL),  // 这个设计可以
+      mutex_(threadSafe ? new std::mutex() : NULL),
       startOfPeriod_(0),
       lastRoll_(0),
       lastFlush_(0) {
-    assert(basename.find('/') ==
-           string::npos);  // 可以 这点也很重要 否则解析会有问题
-                           // 但我感觉报错就好 没必要assert
+    assert(basename.find('/') == std::string::npos);
+
     rollFile();
 }
 
@@ -45,7 +45,7 @@ void logfile::flush() {
 
 void logfile::rollFile() {
     time_t now = 0;
-    std::string filename = getLogFileName(basename_, &now);
+    std::string filename = getlogfilename(basename_, &now);
     time_t start = now - now % Daypreseconds;
 
     lastRoll_ = now;
@@ -54,9 +54,9 @@ void logfile::rollFile() {
     file_.reset(new FileAppend(filename));
 }
 
-std::string logfile::getLogFileName(const string &basename, time_t *now) {
+logfile::getlogfileName(const std::string &basename, time_t *now) {
     std::string filename;
-    filename.reserve(basename.size() + 64);  // 一点优化 前面的数字定长
+    filename.reserve(basename.size() + 64);
     filename = basename;
 
     char timebuf[32];
