@@ -27,9 +27,9 @@ logging::Loglevel initLogLevel() {
         return logging::INFO;
 }
 
-constexpr Logger::LogLevel g_logLevel = initLogLevel();
-logging::OutputFun g_output(defaultOutput);
-logging::FlushFun g_flush(defaultFlush);
+constexpr logging::Loglevel g_logLevel = initLogLevel();
+logging::OutputFun g_output_(defaultOutput);
+logging::FlushFun g_flush_(defaultFlush);
 
 TimeZone g_logTimeZone;
 
@@ -60,9 +60,9 @@ void defaultFlush() { fflush(stdout); }
 
 void logging::setLoglevel(Loglevel level) { g_Loglevel = level; }
 
-void logging::setFlush(FlushFun fun) { g_flush = fun; }
+void logging::setFlush(FlushFun fun) { g_flush_ = fun; }
 
-void logging::setOutput(OutputFun fun) { g_output = fun; }
+void logging::setOutput(OutputFun fun) { g_output_ = fun; }
 
 void logging::setTimeZone(const TimeZone& tz) { g_logTimeZone = tz; }
 
@@ -82,9 +82,9 @@ logging::logging(Filewrapper file, int line, bool toAbort)
 logging::~logging() {
     wrapper_.finish();
     const logstream::Buffer& buf(stream().buffer());
-    g_output(buf.data(), buf.Length());
+    g_output_(buf.data(), buf.Length());
     if (wrapper_.level_ == FATAL) {
-        g_flush();
+        g_flush_();
         abort();
     }
 }
@@ -97,7 +97,9 @@ logging::Funwrapper::Funwrapper(Loglevel level, int old_errno,
       line_(line),
       basename_(file) {
     formatTime();
-    stream_ << helper(LogLevelName[level], 6);
+    std::string str("111111");
+    stream_ << helper(str.c_str(), 6);
+    stream_ << helper(LogLevelName[static_cast<size_t>(level)], 6);
     if (old_errno != 0) {
         stream_ << strerror_tl(old_errno) << " (errno=" << old_errno << ") ";
     }
@@ -109,9 +111,9 @@ void logging::Funwrapper::formatTime() {
         static_cast<time_t>(microSecondsSinceEpoch / Timestamp::KmicroSecond);
     int microseconds =
         static_cast<int>(microSecondsSinceEpoch % Timestamp::KmicroSecond);
+    struct tm tm_time;
     if (seconds != t_lastSecond) {  // 秒存储,只更新微秒
         t_lastSecond = seconds;
-        struct tm tm_time;
         if (g_logTimeZone.valid()) {
             tm_time = g_logTimeZone.toLocalTime(seconds);
         } else {
@@ -135,6 +137,10 @@ void logging::Funwrapper::formatTime() {
         assert(us.length() == 9);
         stream_ << helper(t_time, 17) << helper(us.data(), 9);
     }
+}
+
+void logging::Funwrapper::finish(){
+    stream_ << " - " << basename_ << ':' << line_ << '\n';
 }
 
 }  // namespace detail

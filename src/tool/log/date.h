@@ -2,7 +2,6 @@
 #define DATA_H_
 
 #include <types.h>
-
 #include <algorithm>
 #include <string>
 
