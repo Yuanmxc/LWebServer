@@ -45,7 +45,7 @@ void logfile::flush() {
 
 void logfile::rollFile() {
     time_t now = 0;
-    std::string filename = getlogfilename(basename_, &now);
+    std::string filename = getlogfileName(basename_, &now);
     time_t start = now - now % Daypreseconds;
 
     lastRoll_ = now;
@@ -54,7 +54,7 @@ void logfile::rollFile() {
     file_.reset(new FileAppend(filename));
 }
 
-logfile::getlogfileName(const std::string &basename, time_t *now) {
+std::string logfile::getlogfileName(const std::string &basename, time_t *now) {
     std::string filename;
     filename.reserve(basename.size() + 64);
     filename = basename;
@@ -67,10 +67,9 @@ logfile::getlogfileName(const std::string &basename, time_t *now) {
              &tm);  // 格式化一个时间字符串
     filename += timebuf;
 
-    // TODO filename += hostname
-    char pidbuf[32];
-    // TODO snprintf(pidbuf, sizeof pidbuf, ".%d", ProcessInfo::pid());
-    filename += pidbuf;
+    char pidbuf[32] = {0};
+
+    // filename += pidbuf;
 
     filename += ".log";
 

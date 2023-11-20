@@ -1,5 +1,7 @@
 #include "date.h"
 
+#include <time.h>
+
 #include <string>
 
 namespace ws {

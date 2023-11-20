@@ -26,8 +26,8 @@ class FixedBuffer : public Nocopy {
     void setcookie(std::function<void()> cookie) {
         cookie_ = std::move(cookie);
     }
-    constexpr uint32_t Length() const noexcept {return Spot;}
-    uint32_t avail() const {return BufferSize - Spot;}
+    constexpr uint32_t Length() const noexcept { return Spot; }
+    uint32_t avail() const { return BufferSize - Spot; }
     void add(uint32_t len) { Spot += len; }
     void setSpotBegin() { Spot = 0; }
     char* current() const { return Buffer_.get() + Spot; }

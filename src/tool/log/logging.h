@@ -1,9 +1,11 @@
 #ifndef LOGGING_H_
 #define LOGGING_H_
 
+#include <errno.h>
 #include <string.h>
 
 #include <functional>
+#include <mutex>
 #include <string>
 
 #include "logstream.h"
@@ -24,6 +26,9 @@ class logging {
         FATAL,
         NUM_LOG_LEVELS,
     };
+
+    template <typename logging::Loglevel LEVEL>
+    friend class loggingFactory;
 
     struct Filewrapper {
         template <int Num>
@@ -82,22 +87,33 @@ class logging {
     Funwrapper wrapper_;
 };
 
-extern logging::Loglevel g_Loglevel;
+extern logging::Loglevel g_Loglevel;  // 全局唯一的,即默认日志级别
 
 inline logging::Loglevel logLevel() { return g_Loglevel; }
 
-#define LOG_DEBUG                              \
-    if (logging::Loglevel() <= logging::DEBUG) \
-    logging(__FILE__, __LINE__, logging::DEBUG, __func__).stream()
-#define LOG_INFO                              \
-    if (logging::Loglevel() <= logging::INFO) \
-    logging(__FILE__, __LINE__).stream()
-#define LOG_INFO logging(__FILE__, __LINE__).stream()
-#define LOG_WARN logging(__FILE__, __LINE__, logging::WARN).stream()
-#define LOG_ERROR logging(__FILE__, __LINE__, logging::ERROR).stream()
-#define LOG_FATAL logging(__FILE__, __LINE__, logging::FATAL).stream()
-
 const char* strerror_tl(int savedErrno);
+
+template <typename logging::Loglevel LEVEL>
+class loggingFactory : public Nocopy {
+   private:
+    std::shared_ptr<logging> LogData;
+    std::once_flag resourse_flag;
+
+    void initResourse(logging::Filewrapper file, int line,
+                      typename ws::detail::logging::Loglevel level);  //{
+
+   public:
+    logging& getStream(
+        logging::Filewrapper file, int line, int olderrno,
+        typename ws::detail::logging::Loglevel level = logging::INFO);
+    ~loggingFactory();
+};
+
+logging& log_DEBUG(logging::Filewrapper file, int line, int olderrno);
+logging& log_INFO(logging::Filewrapper file, int line, int olderrno);
+logging& log_WARN(logging::Filewrapper file, int line, int olderrno);
+logging& log_ERROR(logging::Filewrapper file, int line, int olderrno);
+logging& log_FATAL(logging::Filewrapper file, int line, int olderrno);
 
 }  // namespace detail
 
