@@ -12,7 +12,7 @@ namespace ws {
 class UserBuffer : public Nocopy, public BaseBuffer {
    public:
     // 下面的函数继承自基类
-    explicit UserBuffer(int Length = 4096)
+    explicit UserBuffer(int Length = 4048)
         : Buffer_Size(Length),
           Write_Spot(0),
           Read_Spot(0),

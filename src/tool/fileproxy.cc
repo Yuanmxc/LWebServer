@@ -1,9 +1,8 @@
-#include "fileproxy.h"
-
 #include <fcntl.h>
 #include <unistd.h>
-
 #include <memory>
+
+#include "fileproxy.h"
 
 namespace ws {
 

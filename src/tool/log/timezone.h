@@ -1,7 +1,7 @@
 #ifndef TIMEZONE_H_
 #define TIMEZONE_H_
 
-#include <time.h>
+#include <ctime>
 
 #include <memory>
 

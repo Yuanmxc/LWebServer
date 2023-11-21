@@ -44,6 +44,9 @@ int UserBuffer::Write(int bytes) {
 }
 
 int UserBuffer::Write(char *Buf, int bytes) {
+    if(bytes > Writeable()){
+            Move_Buffer();
+        }
     if (bytes > Writeable()) {
         throw std::out_of_range(
             "'UserBuffer::Write' The parameter is not in the valid range");
@@ -54,6 +57,9 @@ int UserBuffer::Write(char *Buf, int bytes) {
 }
 
 int UserBuffer::Write(const char *Buf, int bytes) {
+    if(bytes > Writeable()){
+            Move_Buffer();
+        }
     if (bytes > Writeable()) {
         throw std::out_of_range(
             "'UserBuffer::Write' The parameter is not in the valid range");
@@ -65,6 +71,9 @@ int UserBuffer::Write(const char *Buf, int bytes) {
 
 int UserBuffer::Write(const std::string &str) {
     size_t len = str.length();
+    if(len > Writeable()){
+            Move_Buffer();
+        }
     if (len > Writeable()) {
         throw std::out_of_range(
             "'UserBuffer::Write' The parameter is not in the valid range");

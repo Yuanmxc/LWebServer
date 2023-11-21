@@ -156,7 +156,7 @@ logging& loggingFactory<LEVEL>::getStream(
     std::call_once(resourse_flag, &loggingFactory::initResourse, this, file,
                    line, level);
     logstream& Stream = LogData->stream();
-    LogData->wrapper_.time_ = Timestamp::now();
+    LogData->wrapper_.time_.swap(Timestamp::now());
     LogData->wrapper_.formatTime();
 
     std::string str("111111");
