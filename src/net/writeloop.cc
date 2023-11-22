@@ -25,7 +25,7 @@ bool WriteLoop::Send(int length) {
     }
     User_Buffer_->read(sent_);
     int Remaining = length - sent_;
-    if (Remaining < 0) {
+    if (Remaining > 0) {
         InsertSend(Remaining);
         return false;
     }

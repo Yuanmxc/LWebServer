@@ -60,7 +60,7 @@ int Manger::JudgeToClose(int fd) {
     if (T->CloseAble()) {
         _Epoll_.Remove(static_cast<EpollEvent>(fd));
         auto temp = Fd_To_Member.find(fd);
-        Fd_To_Member.erase(temp);
+        Fd_To_Member.erase(fd);
     } else {
         Update(fd);
     }

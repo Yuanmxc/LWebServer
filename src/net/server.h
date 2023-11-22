@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "../net/address.h"
+#include "../tool/fileopen.h"
 #include "socket.h"
 
 namespace ws {
@@ -12,13 +13,15 @@ class Server : public Socket {
     using fun = std::function<void(int)>;
 
    public:
-    Server(const Address &addr_) : Addr_(std::make_unique<Address>(addr_)) {}
-    Server(const char *buffer, int port)
-        : Addr_(std::make_unique<Address>(buffer, port)) {}
-    explicit Server(int port) : Addr_(std::make_unique<Address>(port)) {}
+    Server(const Address& addr_)
+        : Addr_(std::make_unique<Address>(addr_)), FileOpen() {}
+    Server(const char* buffer, int port)
+        : Addr_(std::make_unique<Address>(buffer, port)), FileOpen() {}
+    explicit Server(int port)
+        : Addr_(std::make_unique<Address>(port)), FileOpen() {}
 
     std::unique_ptr<Socket> Server_Accept();
-    void Server_Accept(fun &&f);
+    bool Server_Accept(fun&& f);
     void Server_BindAndListen();
 
     int Set_AddrRUseA() { return Set_Socket(SO_REUSEADDR); }
@@ -28,7 +31,8 @@ class Server : public Socket {
 
    private:
     std::unique_ptr<Address> Addr_;
-    int Set_Socket(int event_type, void *ptr = nullptr) {
+    fileopen FileOpen; 
+    int Set_Socket(int event_type, void* ptr = nullptr) {
         int buffer_ = 0;
         return setsockopt(fd(), SOL_SOCKET, event_type, &buffer_,
                           sizeof(buffer_));

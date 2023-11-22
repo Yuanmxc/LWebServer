@@ -12,7 +12,7 @@ namespace ws {
 
 class HttpRequest : public Nocopy {
    public:
-    HttpRequest() = default;
+    HttpRequest() { Header_Value.reserve(10); };
 
     void Set_VMajor(int ma) { Version_Major = ma; }
     void Set_VMinor(int mi) { Version_Minor = mi; }

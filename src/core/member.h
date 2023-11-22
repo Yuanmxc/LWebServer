@@ -34,6 +34,7 @@ class Member : public Nocopy, public Havefd {
 
     int fd() const final { return Socket_Ptr->fd(); }
     void Init();
+    ~Member() { Socket_Ptr->Close(); }
 
    private:
     std::unique_ptr<HttpParser> Http_Parser_;

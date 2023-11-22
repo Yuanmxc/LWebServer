@@ -1,5 +1,7 @@
 #include "reaprovider.h"
 
+#include <string>
+
 #include "../../http/httpstatus.h"
 #include "../../tool/filereader.h"
 #include "../../tool/parsed_header.h"
@@ -29,16 +31,16 @@ bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
     }
 
     auto x = _Request_->Get_Value(static_cast<ParsedHeader>("Host"));
-    std::unique_ptr<char[]> ptr1(new char(x.Readable()));
-    auto release_ptr1 = ptr1.release();
-    memcpy(release_ptr1, x.ReadPtr(), x.Readable());
+    std::string str(x.ReadPtr(), x.Readable() + 1);
+    str[x.Readable()] = '\0';
 
     auto y = _Request_->Return_Uri();
-    std::unique_ptr<char[]> ptr2(new char(y.Readable()));
+    std::unique_ptr<char[]> ptr2(new char(y.Readable() + 1));
     auto release_ptr2 = ptr2.release();
     memcpy(release_ptr2, y.ReadPtr(), y.Readable());
+    release_ptr2[y.Readable()] = '\0';
 
-    file = std::make_shared<FileReader>(static_cast<FileProxy>(release_ptr1),
+    file = std::make_shared<FileReader>(static_cast<FileProxy>(str.c_str()),
                                         release_ptr2);
 
     if (!file->Fd_Good() || file->IsTextFile()) {

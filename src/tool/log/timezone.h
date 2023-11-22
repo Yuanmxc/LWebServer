@@ -2,7 +2,6 @@
 #define TIMEZONE_H_
 
 #include <ctime>
-
 #include <memory>
 
 #include "../../base/copyable.h"

@@ -15,9 +15,7 @@ class Timestamp : public Copyable,
     explicit Timestamp(uint64_t args) : microseconds(args) {}
 
     void swap(Timestamp& T) { std::swap(T.microseconds, microseconds); }
-    void swap(Timestamp&& T){
-        std::swap(T.microseconds, microseconds);
-    }
+    void swap(Timestamp&& T) { std::swap(T.microseconds, microseconds); }
     std::string toString() const;
     std::string toFormattedString(bool showMicroseconds = true) const;
     uint64_t Data_microsecond() const { return microseconds; }

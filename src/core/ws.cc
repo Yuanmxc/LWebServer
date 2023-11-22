@@ -29,18 +29,19 @@ void Web_Server::Running() {
         EpollEvent_Result Event_Reault(Y_Dragon::EventResult_Number());
 
         while (true) {
-            // constexpr int Second = 20;
             _Epoll_.Epoll_Wait(Event_Reault);
             for (int i = 0; i < Event_Reault.size(); ++i) {
                 auto& item = Event_Reault[i];
                 int id = item.Return_fd();
 
                 if (id == _Server_.fd()) {
-                    _Server_.Server_Accept([this](int fd) {
-                        _Manger_.Opera_Member(std::make_unique<Member>(fd),
-                                              EpollCanRead());
-                    });
-                    _Epoll_.Modify(_Server_, EpollCanRead());
+                    if (_Server_.Server_Accept([this](int fd) {
+                            _Manger_.Opera_Member(std::make_unique<Member>(fd),
+                                                  EpollCanRead());
+                        }))
+                        _Epoll_.Modify(_Server_, EpollCanRead());
+                    else
+                        continue;
                 } else if (item.check(EETRDHUP)) {
                     _Manger_.Remove(id);
                 } else if (item.check(EETCOULDREAD)) {
@@ -48,7 +49,6 @@ void Web_Server::Running() {
                     _Manger_.JudgeToClose(id);
                 }
             }
-            // TODO : Using Time wheel
         }
     } catch (std::exception& err) {
         std::cout << err.what() << std::endl;

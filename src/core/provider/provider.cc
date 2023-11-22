@@ -72,7 +72,7 @@ const char* Provider::MIME(const char* type, ptrdiff_t len) const {}
 
 int Provider::ProvideError() {
     static constexpr const char temp[] =
-        "<html><head><title>Transgate/HTTP Error</title></head>";
+        "<html><head><title>Ymxc/HTTP Error</title></head>";
     size_t len = strlen(temp);
     _Request_->Set_StatusCode(HSCBadRequest);
     int ret = RegularProvide(len - 1);
