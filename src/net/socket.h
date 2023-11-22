@@ -29,10 +29,10 @@ class Socket : public Havefd, Copyable {
     }
 
     int Close();
-    int Shutdown() {return ::shutdown(Socket_fd_, SHUT_RDWR);}
-    int ShutdownWrite() {return ::shutdown(Socket_fd_, SHUT_WR);}
-    int ShutdownRead() {return ::shutdown(Socket_fd_, SHUT_RD);}
-    
+    int Shutdown() { return ::shutdown(Socket_fd_, SHUT_RDWR); }
+    int ShutdownWrite() { return ::shutdown(Socket_fd_, SHUT_WR); }
+    int ShutdownRead() { return ::shutdown(Socket_fd_, SHUT_RD); }
+
     int fd() const noexcept override { return Socket_fd_; }
     int SetNoblocking(int flag = 0);
     int SetNoblockingCLOEXEC() { return Socket::SetNoblocking(O_CLOEXEC); }

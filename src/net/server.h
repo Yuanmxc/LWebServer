@@ -31,7 +31,7 @@ class Server : public Socket {
 
    private:
     std::unique_ptr<Address> Addr_;
-    fileopen FileOpen; 
+    fileopen FileOpen;
     int Set_Socket(int event_type, void* ptr = nullptr) {
         int buffer_ = 0;
         return setsockopt(fd(), SOL_SOCKET, event_type, &buffer_,
