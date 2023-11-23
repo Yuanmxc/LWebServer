@@ -13,7 +13,8 @@ int Provider::WriteHead(int ma, int mi, const HttpStatusCode& code) {
     auto T = static_cast<int>(code);
     int ret = _Write_Loop_->swrite("HTTP/%d.%d %d %s\r\n", ma, mi, T,
                                    StatusCode_to_String(T));
-    ret += _Write_Loop_->swrite("Server: Yuanmxc_Arch %s\r\n", Yuanmxc_Arch::Version());
+    ret += _Write_Loop_->swrite("Server: Yuanmxc_Arch %s\r\n",
+                                Yuanmxc_Arch::Version());
     return ret;
 }
 
@@ -30,8 +31,8 @@ int Provider::WriteItem(const char* key, const char* va) {
 
 int Provider::WriteConnection() {
     return _Write_Loop_->swrite(
-        "Connection",
-        _Request_->Return_Flag() == Keep_Alive ? "Keep-alive" : "Close");
+        "Connection: %s",
+        _Request_->Return_Flag() == Keep_Alive ? "Keep-alive\n" : "Close\n");
 }
 
 int Provider::WriteCRLF() { return _Write_Loop_->swrite("/r/n", 2); }
@@ -41,9 +42,9 @@ int Provider::RegularProvide(long Content_Length, const char* Content_Type) {
                         _Request_->Return_Version_Mi(),
                         _Request_->Return_Statuscode());
     ret += WriteDate();
-    ret += WriteConnection();
-    ret += WriteItem("Content-Type", Content_Type);
-    ret += WriteItem("Content-Length", std::to_string(Content_Length).c_str());
+    ret += WriteConnection(); 
+        ret += WriteItem("Content-Type: %s", Content_Type); 
+        ret += WriteItem("Content-Length %s", std::to_string(Content_Length).c_str());
     return ret;
 }
 
@@ -60,8 +61,7 @@ const char* Provider::AutoAdapt() const {
             End = Start;
         }
     }
-    return Start == temp ? defaultMIME()
-                         : MIME(Start, std::distance(Start, End));
+    return defaultMIME();
 }
 
 int Provider::RegularProvide(long Content_Length) {

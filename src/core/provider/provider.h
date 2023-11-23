@@ -26,7 +26,7 @@ class Provider : public Copyable {
     // long int
     const char* MIME(const char*, ptrdiff_t) const;
     const char* AutoAdapt() const;  // 用于指定响应数据的类型和编码
-    constexpr const char* defaultMIME() const { return "text/html"; }
+    constexpr const char* defaultMIME() const { return "text/html\n"; }
     bool Good() const { return _Request_->Request_good(); }
     bool IsFilename(char) const;
 

@@ -1,8 +1,7 @@
-#include "server.h"
-
 #include <assert.h>
-
 #include <iostream>
+
+#include "server.h"
 
 namespace {
 template <typename T>
@@ -17,16 +16,15 @@ std::unique_ptr<Socket> Server::Server_Accept() {
         ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK));
 }
 
-bool Server::Server_Accept(fun&& f) {
+void Server::Server_Accept(fun&& f) {
     int ret = 0;
     ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
     if (ret != -1) {
         f(ret);
         std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
-        return true;
     } else if (errno == EMFILE) {
         fileopen_helper prevent(FileOpen);
-        return false;
+
     }
 }
 

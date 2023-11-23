@@ -37,10 +37,11 @@ void Web_Server::Running() {
                 auto& item = Event_Reault[i];
                 int id = item.Return_fd();
 
-                if(id == _Server_.fd()){ //这里放入事件循环
-                        _Server_.Server_Accept([&](int fd){Channel_.Distribution(fd);});
-                        _Epoll_.Modify(_Server_, EpollCanRead());
-                    }
+                if (id == _Server_.fd()) {  // 这里放入事件循环
+                    _Server_.Server_Accept(
+                        [&](int fd) { Channel_.Distribution(fd); });
+                    _Epoll_.Modify(_Server_, EpollCanRead());
+                }
             }
         }
     } catch (std::exception& err) {

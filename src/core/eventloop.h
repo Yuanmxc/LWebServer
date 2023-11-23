@@ -2,6 +2,7 @@
 #define EVENTLOOP_H_
 
 #include <assert.h>
+
 #include <thread>
 
 #include "../base/nocopy.h"
