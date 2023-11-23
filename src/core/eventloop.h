@@ -2,12 +2,12 @@
 #define EVENTLOOP_H_
 
 #include <assert.h>
-
 #include <thread>
 
+#include "../base/nocopy.h"
 namespace ws {
 
-class EventLoop {
+class EventLoop : public Nocopy {
    private:
     bool looping;
     const std::thread::id threadID;

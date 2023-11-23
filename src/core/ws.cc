@@ -18,7 +18,7 @@ int64_t Get_Current_Time() {
 }
 
 Web_Server::Web_Server()
-    : _Epoll_(), _Manger_(_Epoll_), _Server_(Y_Dragon::MyPort()) {}
+    : _Epoll_(), _Manger_(_Epoll_), _Server_(Yuanmxc_Arch::MyPort()) {}
 
 void Web_Server::Running() {
     try {
@@ -26,7 +26,10 @@ void Web_Server::Running() {
         _Server_.Set_AddrRUseP();
         _Server_.Server_BindAndListen();
         _Epoll_.Add(_Server_, EpollCanRead());
-        EpollEvent_Result Event_Reault(Y_Dragon::EventResult_Number());
+        EpollEvent_Result Event_Reault(Yuanmxc_Arch::EventResult_Number());
+
+        channel_helper Channel_;
+        Channel_.loop();
 
         while (true) {
             _Epoll_.Epoll_Wait(Event_Reault);
@@ -34,20 +37,10 @@ void Web_Server::Running() {
                 auto& item = Event_Reault[i];
                 int id = item.Return_fd();
 
-                if (id == _Server_.fd()) {
-                    if (_Server_.Server_Accept([this](int fd) {
-                            _Manger_.Opera_Member(std::make_unique<Member>(fd),
-                                                  EpollCanRead());
-                        }))
+                if(id == _Server_.fd()){ //这里放入事件循环
+                        _Server_.Server_Accept([&](int fd){Channel_.Distribution(fd);});
                         _Epoll_.Modify(_Server_, EpollCanRead());
-                    else
-                        continue;
-                } else if (item.check(EETRDHUP)) {
-                    _Manger_.Remove(id);
-                } else if (item.check(EETCOULDREAD)) {
-                    _Manger_.Reading(id);
-                    _Manger_.JudgeToClose(id);
-                }
+                    }
             }
         }
     } catch (std::exception& err) {

@@ -13,7 +13,7 @@ int Provider::WriteHead(int ma, int mi, const HttpStatusCode& code) {
     auto T = static_cast<int>(code);
     int ret = _Write_Loop_->swrite("HTTP/%d.%d %d %s\r\n", ma, mi, T,
                                    StatusCode_to_String(T));
-    ret += _Write_Loop_->swrite("Server: Y_Dragon %s\r\n", Y_Dragon::Version());
+    ret += _Write_Loop_->swrite("Server: Yuanmxc_Arch %s\r\n", Yuanmxc_Arch::Version());
     return ret;
 }
 
