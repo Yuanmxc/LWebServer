@@ -44,9 +44,11 @@ class WriteLoop : public Nocopy, public Havefd {
     }
 
     bool DoFirst();
-    bool DoAll(){
-                std::cout << "发送消息\n";
-                while(DoFirst());}
+    bool DoAll() {
+        std::cout << "发送消息\n";
+        while (DoFirst())
+            ;
+    }
 
    private:
     std::unique_ptr<UserBuffer> User_Buffer_;

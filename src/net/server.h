@@ -1,42 +1,53 @@
-#ifndef SERVER_H_
-#define SERVER_H_
+#ifndef SOCKET__H_
+#define SOCKET__H_
 
-#include <functional>
+#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 #include <memory>
 
-#include "../net/address.h"
-#include "../tool/fileopen.h"
-#include "socket.h"
+#include "../base/copyable.h"
+#include "../base/havefd.h"
+#include "../tool/userbuffer.h"
 
 namespace ws {
-class Server : public Socket {
-    using fun = std::function<void(int)>;
-
+class Socket : public Havefd, Copyable {
    public:
-    Server(const Address& addr_)
-        : Addr_(std::make_unique<Address>(addr_)), FileOpen() {}
-    Server(const char* buffer, int port)
-        : Addr_(std::make_unique<Address>(buffer, port)), FileOpen() {}
-    explicit Server(int port)
-        : Addr_(std::make_unique<Address>(port)), FileOpen() {}
+    Socket()
+        : Socket_fd_(
+              socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
+        SetKeepAlive();
+        SetNoDelay();
+    }
+    explicit Socket(int fd) : Socket_fd_(fd) {}
+    explicit Socket(const Havefd& Hf) : Socket_fd_(Hf.fd()) {}
+    explicit Socket(const Havefd&& Hf) : Socket_fd_(Hf.fd()) {}
 
-    std::unique_ptr<Socket> Server_Accept();
-    void Server_Accept(fun&& f);
-    void Server_BindAndListen();
+    virtual ~Socket() {
+        if (Have_Close_) ::close(Socket_fd_);
+    }
 
-    int Set_AddrRUseA() { return Set_Socket(SO_REUSEADDR); }
-    int Set_AddrRUseP() { return Set_Socket(SO_REUSEPORT); }
-    int Set_KeepAlive() { return Set_Socket(SO_KEEPALIVE); }
-    int Set_Linger();
+    int Close();
+    int Shutdown() { return ::shutdown(Socket_fd_, SHUT_RDWR); }
+    int ShutdownWrite() { return ::shutdown(Socket_fd_, SHUT_WR); }
+    int ShutdownRead() { return ::shutdown(Socket_fd_, SHUT_RD); }
+
+    int fd() const noexcept override { return Socket_fd_; }
+    int SetNoblocking(int flag = 0);
+    int SetNoblockingCLOEXEC() { return Socket::SetNoblocking(O_CLOEXEC); }
+    int SetNoDelay();
+    int SetKeepAlive();
+
+    int Read(char* Buffer, int Length, int flag = 0);
+    int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
+
+    int Write(char* Buffer, int length, int flag = 0);
 
    private:
-    std::unique_ptr<Address> Addr_;
-    fileopen FileOpen;
-    int Set_Socket(int event_type, void* ptr = nullptr) {
-        int buffer_ = 0;
-        return setsockopt(fd(), SOL_SOCKET, event_type, &buffer_,
-                          sizeof(buffer_));
-    }
+    bool Have_Close_ = true;
+    int Socket_fd_;
 };
 }  // namespace ws
 

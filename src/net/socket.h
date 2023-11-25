@@ -17,9 +17,7 @@ class Socket : public Havefd, Copyable {
    public:
     Socket()
         : Socket_fd_(
-              socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
-        // SetNoblockingCLOEXEC();
-    }
+              socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {}
     explicit Socket(int fd) : Socket_fd_(fd) {}
     explicit Socket(const Havefd &Hf) : Socket_fd_(Hf.fd()) {}
     explicit Socket(const Havefd &&Hf) : Socket_fd_(Hf.fd()) {}
@@ -41,7 +39,6 @@ class Socket : public Havefd, Copyable {
     int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
 
     int Write(char *Buffer, int length, int flag = 0);
-    // int Read(...)
 
    private:
     bool Have_Close_ = true;

@@ -1,7 +1,8 @@
-#include <assert.h>
-#include <iostream>
-
 #include "server.h"
+
+#include <assert.h>
+
+#include <iostream>
 
 namespace {
 template <typename T>
@@ -24,7 +25,6 @@ void Server::Server_Accept(fun&& f) {
         std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
     } else if (errno == EMFILE) {
         fileopen_helper prevent(FileOpen);
-
     }
 }
 

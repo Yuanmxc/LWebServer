@@ -42,9 +42,10 @@ int Provider::RegularProvide(long Content_Length, const char* Content_Type) {
                         _Request_->Return_Version_Mi(),
                         _Request_->Return_Statuscode());
     ret += WriteDate();
-    ret += WriteConnection(); 
-        ret += WriteItem("Content-Type: %s", Content_Type); 
-        ret += WriteItem("Content-Length %s", std::to_string(Content_Length).c_str());
+    ret += WriteConnection();
+    ret += WriteItem("Content-Type: %s", Content_Type);
+    ret +=
+        WriteItem("Content-Length %s", std::to_string(Content_Length).c_str());
     return ret;
 }
 

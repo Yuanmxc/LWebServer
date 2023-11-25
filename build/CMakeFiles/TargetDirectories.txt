@@ -1,3 +1,0 @@
-/home/Yuanmxc/repository/MxcServer/build/CMakeFiles/Web_Server.dir
-/home/Yuanmxc/repository/MxcServer/build/CMakeFiles/edit_cache.dir
-/home/Yuanmxc/repository/MxcServer/build/CMakeFiles/rebuild_cache.dir

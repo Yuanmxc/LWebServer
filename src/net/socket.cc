@@ -1,9 +1,10 @@
 #include "socket.h"
 
 #include <errno.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
 
 #include <iostream>
-
 namespace ws {
 int Socket::Close() {
     int rv = ::close(Socket_fd_);
@@ -52,5 +53,17 @@ int Socket::Read(char* Buffer, int length, int flag) {
 int Socket::Write(char* Buffer, int length, int flag) {
     return static_cast<int>(send(Socket_fd_, static_cast<void*>(Buffer),
                                  static_cast<ssize_t>(length), flag));
+}
+
+int Socket::SetNoDelay() {
+    int optval = 1;
+    ::setsockopt(fd(), SOL_SOCKET, TCP_NODELAY, &optval,
+                 static_cast<socklen_t>(sizeof optval));
+}
+
+int Socket::SetKeepAlive() {
+    int optval = 1;
+    ::setsockopt(fd(), SOL_SOCKET, SO_KEEPALIVE, &optval,
+                 static_cast<socklen_t>(sizeof optval));
 }
 }  // namespace ws
