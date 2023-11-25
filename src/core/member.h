@@ -17,10 +17,13 @@ namespace ws {
 class Member : public Nocopy, public Havefd {
    public:
     Member(int fd, long time = -1l)
-        : Socket_Ptr(std::make_unique<Socket>(fd)), Time_Spot(time) {
+        : Socket_Ptr(std::make_unique<Socket>(fd)),
+          Time_Spot(time),
+          WriteComplete(false) {
         Init();
     }
-    Member(std::unique_ptr<Socket>&& ptr, long time = -1l) : Time_Spot(time) {
+    Member(std::unique_ptr<Socket>&& ptr, long time = -1l)
+        : Time_Spot(time), WriteComplete(false) {
         Init();
         std::swap(Socket_Ptr, ptr);
     }
@@ -34,6 +37,7 @@ class Member : public Nocopy, public Havefd {
 
     int fd() const final { return Socket_Ptr->fd(); }
     void Init();
+    bool IsWriteComplete() const noexcept { return WriteComplete; }
     ~Member() { Socket_Ptr->Close(); }
 
    private:
@@ -45,6 +49,7 @@ class Member : public Nocopy, public Havefd {
 
     std::shared_ptr<UserBuffer> User_Buffer;
     long Time_Spot;
+    bool WriteComplete;
 };
 }  // namespace ws
 

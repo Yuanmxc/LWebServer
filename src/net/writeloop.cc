@@ -14,7 +14,7 @@ int WriteLoop::swrite(const char* format, ...) {
     return ret;
 }
 
-bool WriteLoop::Send(int length) {
+WriteLoop::COMPLETETYPE WriteLoop::Send(int length) {
     if (length < 1)
         throw std::invalid_argument("'WriteLoop::Send' error parameter.");
     int sent_ = 0;
@@ -25,31 +25,51 @@ bool WriteLoop::Send(int length) {
     }
     User_Buffer_->read(sent_);
     int Remaining = length - sent_;
-    if (Remaining > 0) {
+    bool faultError = false;
+    if (errno != EWOULDBLOCK) {
+        if (errno == EPIPE ||
+            errno == ECONNRESET) {  // 服务端收到RST报文后 write出现EPIPE
+                                    // recv出现ECONNRESET
+            faultError = true;
+        }
+    }
+    if (!faultError && Remaining > 0) {  // write failture.
         InsertSend(Remaining);
-        return false;
+        return IMCOMPLETE;
     }
     return true;
 }
 
-bool WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
+WriteLoop::COMPLETETYPE WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
     ssize_t len = 0;
     while (len = ptr->SendFile(fd_) && len > 0) {
     }
     if (ptr->Send_End()) {
         InsertSendFile(ptr);
-        return false;
+        return IMCOMPLETE;
     }
-    return true;
+    return COMPLETE;
 }
 
-bool WriteLoop::DoFirst() {
+WriteLoop::COMPLETETYPE WriteLoop::DoFirst() {
     if (!Que.empty()) {
         auto Fun = Que.front();
         Que.pop_front();
         return Fun();
     }
-    return false;
+    return EMPTY;
+}
+
+WriteLoop::COMPLETETYPE WriteLoop::DoAll() {
+    std::cout << "发送消息\n";
+    while (1) {
+        auto CompleteType = DoFirst();
+        std::cout << "CompleteType = " << CompleteType << std::endl;
+        if (CompleteType == COMPLETE)
+            continue;
+        else
+            return EMPTY;
+    }
 }
 
 }  // namespace ws

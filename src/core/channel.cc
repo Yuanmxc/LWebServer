@@ -32,6 +32,9 @@ void looping(std::promise<std::queue<int>*>& pro, int eventfd) {
                     rea._Manger_.Remove(id);
                 } else if (item.check(EETCOULDREAD)) {
                     rea._Manger_.Reading(id);
+                    rea._Manger_.JudgeToClose(id);  // 修改
+                } else if (item.check(EETCOULDWRITE)) {
+                    rea._Manger_.Writing(id);
                     rea._Manger_.JudgeToClose(id);
                 }
             }

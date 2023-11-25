@@ -16,7 +16,21 @@ void Member::DoRead() {
     if (Http_Parser_->Finished()) {
         Content_Provider_->Provide();
     }
-    Write_Loop_->DoAll();
+    if (Write_Loop_->DoAll() != WriteLoop::IMCOMPLETE) {
+        WriteComplete = true;
+        if (WriteComplete)
+            std::cout << "Doall : true\n";
+        else
+            std::cout << "Doall : fasle\n";
+    }
+}
+
+void Member::DoWrite() {
+    if (Write_Loop_->DoAll() != WriteLoop::IMCOMPLETE) {
+        WriteComplete = true;
+    } else {
+        WriteComplete = false;
+    }
 }
 
 void Member::Init() {

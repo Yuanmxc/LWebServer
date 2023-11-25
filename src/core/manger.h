@@ -30,6 +30,7 @@ class Manger : public Copyable {
     void Writing(int fd, long time = -1);
     int JudgeToClose(int fd);
     int Update(int fd);
+    int UpdateWrite(int fd);
 
     int Remove(int fd);
     bool Exist(int fd) {
