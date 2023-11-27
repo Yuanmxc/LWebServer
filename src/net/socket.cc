@@ -26,13 +26,34 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
 
     ssize_t sum = 0;
     ssize_t ret = 0;
+    char* StartBuffer = ptr->WritePtr();
     while (true) {
         std::cout << "errno : " << errno << std::endl;
-        ret = recv(Socket_fd_, ptr->WritePtr(), static_cast<size_t>(length),
-                   flag);
-        if (ret != -1) {
+        ret = recv(Socket_fd_, StartBuffer, static_cast<size_t>(length), flag);
+        if (ret != -1 && !ExtraBuffer_.IsVaild()) {
             sum += ret;
+            length -= ret;
             ptr->Write(ret);
+            StartBuffer = ptr->WritePtr();
+            if (!ptr->Writeable()) {
+                ExtraBuffer_.init();
+                StartBuffer = ExtraBuffer_.Get_ptr();
+                length = ExtraBuffer_.WriteAble();
+            }
+        } else if (ret != -1 && ExtraBuffer_.IsVaild()) {
+            sum += ret;
+            length -= ret;
+            ExtraBuffer_.Write(ret);
+            StartBuffer = ExtraBuffer_.Get_ptr();
+            if (!ExtraBuffer_.WriteAble()) {
+                if (ExtraBuffer_.IsExecutehighWaterMark()) {
+                    ExtraBuffer_.Callback();
+                    break;
+                }
+                ExtraBuffer_.Reset();
+                StartBuffer = ExtraBuffer_.Get_ptr();
+                length = ExtraBuffer_.WriteAble();
+            }
         } else if (ret < 0) {  // errno == EAGAIN || errno == EWOULDBLOCK ||
                                // errno == EINTR
             if (errno == EWOULDBLOCK || errno == EAGAIN)

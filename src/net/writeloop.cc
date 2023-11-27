@@ -44,7 +44,7 @@ WriteLoop::COMPLETETYPE WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
     ssize_t len = 0;
     while (len = ptr->SendFile(fd_) && len > 0) {
     }
-    if (ptr->Send_End()) {
+    if (!ptr->Send_End()) {
         InsertSendFile(ptr);
         return IMCOMPLETE;
     }
@@ -68,7 +68,7 @@ WriteLoop::COMPLETETYPE WriteLoop::DoAll() {
         if (CompleteType == COMPLETE)
             continue;
         else
-            return EMPTY;
+            return CompleteType;
     }
 }
 

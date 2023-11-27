@@ -2,10 +2,12 @@
 #define SOCKET__H_
 
 #include <fcntl.h>
+#include <string.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <functional>
 #include <memory>
 
 #include "../base/copyable.h"
@@ -13,6 +15,55 @@
 #include "../tool/userbuffer.h"
 
 namespace ws {
+
+class Extrabuf : public Nocopy {
+    enum isvaild { INVAILD = -1, VAILD };
+
+   public:
+    void init() {
+        extrabuf = std::make_unique<char[]>(4048);
+        ExtrabufPeek = static_cast<int>(VAILD);
+    }
+    char* Get_ptr() const noexcept { return extrabuf.get(); }
+
+    int Get_length() const noexcept { return ExtrabufPeek; }
+
+    void Write(int spot) noexcept { ExtrabufPeek = spot; }
+
+    int WriteAble() const noexcept { return BufferSize - ExtrabufPeek; }
+
+    bool IsVaild() const noexcept {
+        return ExtrabufPeek == INVAILD ? false : true;
+        // return static_cast<bool>(ExtrabufPeek);
+    }
+
+    bool Reset() {
+        std::unique_ptr<char[]> TempPtr = std::make_unique<char[]>(BufferSize);
+        memcpy(TempPtr.get(), extrabuf.get(), BufferSize);
+        extrabuf.reset(new char[BufferSize * 2]);
+        memcpy(extrabuf.get(), TempPtr.get(), BufferSize);
+        BufferSize *= 2;
+    }
+
+    void SetHighWaterMarkCallback_(std::function<void()> fun) {
+        highWaterMarkCallback_ = std::move(fun);
+    }
+
+    bool IsExecutehighWaterMark() const noexcept {
+        return Get_length() >= highWaterMark_;
+    }
+
+    void Callback() {
+        if (highWaterMarkCallback_) highWaterMarkCallback_();
+    }
+
+   private:
+    static const int highWaterMark_ = 64 * 1024 * 1024;
+    std::function<void()> highWaterMarkCallback_;
+    std::unique_ptr<char[]> extrabuf = nullptr;
+    int ExtrabufPeek = static_cast<int>(isvaild::INVAILD);
+    int BufferSize = 4048;
+};
 class Socket : public Havefd, Copyable {
    public:
     Socket()
@@ -46,6 +97,7 @@ class Socket : public Havefd, Copyable {
     int Write(char* Buffer, int length, int flag = 0);
 
    private:
+    Extrabuf ExtraBuffer_;
     bool Have_Close_ = true;
     int Socket_fd_;
 };

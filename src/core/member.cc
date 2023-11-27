@@ -18,10 +18,6 @@ void Member::DoRead() {
     }
     if (Write_Loop_->DoAll() != WriteLoop::IMCOMPLETE) {
         WriteComplete = true;
-        if (WriteComplete)
-            std::cout << "Doall : true\n";
-        else
-            std::cout << "Doall : fasle\n";
     }
 }
 
