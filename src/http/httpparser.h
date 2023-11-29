@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "../base/nocopy.h"
+#include "../net/socket.h"
 #include "../tool/userbuffer.h"
 #include "httprequest.h"
 #include "httpstatus.h"
@@ -13,10 +14,11 @@ namespace ws {
 class HttpParser : public Nocopy {
    public:
     explicit HttpParser(std::shared_ptr<UserBuffer> ptr,
-                        std::shared_ptr<HttpRequest> request)
+                        std::shared_ptr<HttpRequest> request, Extrabuf& extra)
         : User_Buffer_(std::move(ptr)),
           Parser_Result(std::make_unique<HttpParser_Content>()),
-          Request_Result(request) {}
+          Request_Result(request),
+          Extrabuffer_(extra) {}
 
     void Again_Parser();
     HttpParserFault Starting_Parser();
@@ -29,6 +31,7 @@ class HttpParser : public Nocopy {
     std::unique_ptr<HttpParser_Content> Parser_Result;
     std::shared_ptr<HttpRequest> Request_Result;
 
+    Extrabuf& Extrabuffer_;
     bool Parsering();
     bool Parser_able() { return User_Buffer_->Readable() >= 16; }
 };

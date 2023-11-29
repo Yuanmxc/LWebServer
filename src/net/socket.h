@@ -39,6 +39,8 @@ class Socket : public Havefd, Copyable {
     int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
 
     int Write(char *Buffer, int length, int flag = 0);
+    bool IsExtraBuffer() const { return ExtraBuffer_.IsVaild(); }
+    Extrabuf &ReturnExtraBuffer() { return ExtraBuffer_; }
 
    private:
     bool Have_Close_ = true;

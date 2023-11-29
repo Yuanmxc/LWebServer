@@ -26,6 +26,19 @@ void Server::Server_Accept(fun&& f) {
     } else if (errno == EMFILE) {
         fileopen_helper prevent(FileOpen);
     }
+    while (1) {
+        int ret = 0;
+        ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
+        if (ret != -1) {
+            f(ret);
+            std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
+        } else if (ret == -1 && errno == EMFILE) {
+            fileopen_helper prevent(FileOpen);
+            break;
+        } else if (ret == -1) {
+            break;
+        }
+    }
 }
 
 void Server::Server_BindAndListen() {
