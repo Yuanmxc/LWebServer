@@ -43,7 +43,7 @@ enum FCGI_Type {
 #define FCGI_NULL_REQUEST_ID 0
 
 typedef struct {
-    unsigned char roleB1;  // web服务器所期望php-fpm扮演的角色，具体取值下面有
+    unsigned char roleB1;  // web服务器所期望php-fpm扮演的角色
     unsigned char roleB0;
     unsigned char flags;  // 确定php-fpm处理完一次请求之后是否关闭
     unsigned char reserved[5];  // 保留字段
