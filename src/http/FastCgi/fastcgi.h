@@ -15,6 +15,12 @@ class FastCgi {
     static const int CONTENT_BUFFER_LEN = 1024;
 
    public:
+    FastCgi() : socket_(::socket(AF_INET, SOCK_STREAM, 0)) {}
+    void start(const std::string& path, const std::string& data);
+    int ReturnSocketFd() const noexcept { return socket_.fd(); }
+    std::string ReadContent();  // 从套接字读取消息
+
+   private:
     // 生成头部
     void SetRequestID(int ID) noexcept { requestId_ = ID; }
 
@@ -31,7 +37,6 @@ class FastCgi {
                             const std::string& value, int valueLen,
                             unsigned char* ContentBuffPtr, int* ContentLen);
     void SendRequest(const std::string& data, size_t len);
-    std::string ReadContent();  // 从套接字读取消息
     void GetContent(char* data);
     char* FindStart(char* data);
 };

@@ -3,8 +3,10 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <netinet/in.h>
+#include <string.h>
 #include <sys/socket.h>
 
+#include <algorithm>
 #include <iostream>
 
 namespace ws {
@@ -13,6 +15,8 @@ void FastCgi::Conection() {
     struct sockaddr_in ServerAddress;
     memset(&ServerAddress, 0, sizeof ServerAddress);
     constexpr char IP[] = "127.0.0.1";
+
+    assert(socket_.fd() > 0);
 
     ServerAddress.sin_family = AF_INET;
     ServerAddress.sin_addr.s_addr = inet_addr(IP);
@@ -26,8 +30,8 @@ void FastCgi::Conection() {
     assert(ret >= 0);
 }
 
-FCGI_Header CreateHeader(int type, int request, int contentLength,
-                         int paddingLength) {
+FCGI_Header FastCgi::CreateHeader(int type, int request, int contentLength,
+                                  int paddingLength) {
     FCGI_Header header;
     header.version = FCGI_VERSION_1;    // 版本一般设置为1
     header.type = (unsigned char)type;  // 设置请求类型
@@ -60,7 +64,7 @@ FCGI_BeginRequestBody FastCgi::CreateBeginRequestBody(int role,
         (unsigned char)((keepConnection) ? FCGI_KEEP_CONN
                                          : 0);  // 大于0常连接，否则短连接
 
-    bzero(&body.reserved, sizeof(body.reserved));
+    memset(&body.reserved, 0, sizeof body.reserved);
 
     return body;
 }
@@ -112,7 +116,6 @@ void FastCgi::CreateContentValue(const std::string& name,
 
 void FastCgi::SendContent(const std::string& tag, const std::string& value) {
     unsigned char bodyBuffer[CONTENT_BUFFER_LEN];
-    memset(bodyBuffer, 0, sizeof bodyBuffer);
 
     int ContentLength = 0;
     CreateContentValue(tag, tag.size(), value, value.size(), bodyBuffer,
@@ -123,10 +126,9 @@ void FastCgi::SendContent(const std::string& tag, const std::string& value) {
 
     int AllContentLength = ContentLength + FCGI_HEADER_LEN;
     char Content[AllContentLength];
-    memset(Content, 0, AllContentLength * sizeof(char));
 
     memcpy(Content, (char*)&ContentHeader, FCGI_HEADER_LEN);
-    memcpy(Content + FCGI_HEADER_LEN, Content, ContentLength);
+    memcpy(Content + FCGI_HEADER_LEN, bodyBuffer, ContentLength);
 
     int ret = ::write(socket_.fd(), Content, AllContentLength);
     assert(ret == AllContentLength);
@@ -136,7 +138,6 @@ bool FastCgi::EndRequest() {
     FCGI_Header EndHeader(CreateHeader(FCGI_PARAMS, requestId_, 0));
 
     int ret = ::write(socket_.fd(), (char*)&EndHeader, FCGI_HEADER_LEN);
-    if (ret < 0) return false;
     assert(ret == FCGI_HEADER_LEN);
 
     return true;
@@ -147,15 +148,12 @@ void FastCgi::SendRequest(const std::string& data, size_t len) {
         CreateHeader(FCGI_STDIN, requestId_, len));  // 发送的输入
     int ret_IntervalHead =
         ::send(socket_.fd(), (char*)&IntervalHead, FCGI_HEADER_LEN, 0);
-    assert(ret_IntervalHead == FCGI_HEADER_LEN);
 
     int ret_Data = ::send(socket_.fd(), data.c_str(), len, 0);
-    assert(ret_Data == len);
 
     FCGI_Header EndHeader(CreateHeader(FCGI_STDIN, requestId_, 0));
     int ret_EndHead =
         ::send(socket_.fd(), (char*)&EndHeader, FCGI_HEADER_LEN, 0);
-    assert(ret_EndHead == FCGI_HEADER_LEN);
     // 网络上的问题目前不太好解决, 消息发送不完全的话就退出
 }
 
@@ -210,7 +208,6 @@ void FastCgi::GetContent(char* data) {
     char* pt;  // 保存html内容开始位置
 
     if (1 == HtmlFlag) {  // 读取到的content是html内容
-        // TODO 这个值得搞一手
     } else {
         if ((pt = FindStart(data)) != NULL) {
             HtmlFlag = 1;
@@ -226,5 +223,31 @@ char* FastCgi::FindStart(char* data) {
     }
     return NULL;
 }
+void  // 传入要请求的路径与输入
+FastCgi::start(const std::string& path, const std::string& data) {
+    ++requestId_;
+    // 连接服务器php-fpm
+    Conection();
+    StartRequest();  // 发送初始请求头和请求体
+    // FCGI_BEGIN_REQUEST
 
+    // 设置method 为post
+    // 设置script_name变量为php资源路径
+    // 设置content-type　文本格式
+    // 设置content-length消息长度
+    // 将要操作的数据传过去
+    char Length[32];
+    sprintf(Length, "%d", data.size());
+    // 先发送一个头部 然后在发送消息体 消息体由一个FCGI_Header和消息体在一起.
+    // FCGI_PARAMS
+    SendContent("SCRIPT_FILENAME", path.c_str());
+    SendContent("REQUEST_METHOD", "POST");
+    SendContent("CONTENT_LENGTH", Length);
+    SendContent("CONTENT_TYPE", "application/x-www-form-urlencoded");
+
+    EndRequest();  // 请求头结束
+    // FCGI_PARAMS
+    // 结束发送 发送
+    SendRequest(data.c_str(), data.size());
+}
 }  // namespace ws

@@ -43,6 +43,7 @@ class Extrabuf : public Nocopy {
         extrabuf.reset(new char[BufferSize * 2]);
         memcpy(extrabuf.get(), TempPtr.get(), BufferSize);
         BufferSize *= 2;
+        return true;
     }
 
     void SetHighWaterMarkCallback_(std::function<void()> fun) {
