@@ -2,16 +2,37 @@
 
 #include <string>
 
+#include "../../http/FastCgi/fastcgi.h"
 #include "../../http/httpstatus.h"
 #include "../../tool/filereader.h"
 #include "../../tool/parsed_header.h"
-
 namespace ws {
 
 void REAProvider::provide() {
     std::shared_ptr<FileReader> file = nullptr;
-    bool cond = FileProvider(file);
-    if (cond) {
+    if (_Request_->Return_Method() == HRPost) {
+        FastCgi fc;
+        auto x = _Request_->Get_Value(static_cast<ParsedHeader>("Host"));
+        std::string Host(x.ReadPtr(), x.Readable() + 1);
+        Host[x.Readable()] = '\0';
+
+        auto y = _Request_->Return_Uri();
+        std::string Filename(y.ReadPtr(), y.Readable() + 1);
+        Filename[x.Readable()] = '\0';
+        fc.start(Host + "/" + Filename, "hello world");
+        std::string Content(fc.ReadContent());
+        if (!Good()) {
+            _Request_->Set_StatusCode(HSCBadRequest);
+            ProvideError();
+            return;
+        }
+        _Request_->Set_StatusCode(HSCOK);
+        int ret = RegularProvide(Content.size());
+        ret += WriteCRLF();
+        ret += _Write_Loop_->write(Content.c_str(), Content.size());
+        ret += WriteCRLF();
+        _Write_Loop_->AddSend(ret);
+    } else if (FileProvider(file)) {
         int ret = RegularProvide(file->FileSize());
         ret += WriteCRLF();
         _Write_Loop_->AddSend(ret);

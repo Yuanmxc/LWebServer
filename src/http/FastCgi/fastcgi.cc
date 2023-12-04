@@ -16,8 +16,6 @@ void FastCgi::Conection() {
     memset(&ServerAddress, 0, sizeof ServerAddress);
     constexpr char IP[] = "127.0.0.1";
 
-    assert(socket_.fd() > 0);
-
     ServerAddress.sin_family = AF_INET;
     ServerAddress.sin_addr.s_addr = inet_addr(IP);
     ServerAddress.sin_port = htons(9000);
