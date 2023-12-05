@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "../base/Yuanmxc_Arch.h"
+#include "../base/config.h"
 
 namespace ws {
 

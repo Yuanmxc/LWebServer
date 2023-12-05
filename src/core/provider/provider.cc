@@ -1,6 +1,6 @@
 #include "provider.h"
 
-#include "../../base/Yuanmxc_Arch.h"
+#include "../base/config.h"
 #include "../../http/httpstatus.h"
 
 namespace ws {

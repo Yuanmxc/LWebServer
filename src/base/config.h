@@ -11,9 +11,15 @@ namespace Yuanmxc_Arch {
 
 constexpr char* Version() { return (char*)"0.0"; }
 
-int MyPort();
+constexpr int MyPort();
 
-int EventResult_Number();
+constexpr char* MyIP();
+
+constexpr int FastCgiPort();
+
+constexpr char* FastCgiIP();
+
+constexpr int EventResult_Number();
 }  // namespace Yuanmxc_Arch
 
 #endif

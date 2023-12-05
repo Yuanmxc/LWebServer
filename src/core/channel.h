@@ -10,7 +10,7 @@
 #include <thread>
 #include <vector>
 
-#include "../base/Yuanmxc_Arch.h"
+#include "../base/config.h"
 #include "../base/havefd.h"
 #include "../base/nocopy.h"
 #include "../net/epoll.h"
