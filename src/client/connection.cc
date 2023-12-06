@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <functional>
 #include <iostream>
 
 #include "../net/epoll_event.h"
@@ -109,8 +108,6 @@ bool Connection::isSelfConnect(int sockfd) {
     }
 }
 
-// 正常的写过程 触发写事件时传入fd,判断正确后再加入client的map中
-// 所以写入是fd如果map中没有的话就是connecting的可写事件
 void Connection::HandleWrite(
     int fd, const std::function<void(int)>& newConnectionCallback) {
     if (states == kConnecting) {
@@ -122,12 +119,22 @@ void Connection::HandleWrite(
         } else {
             SetConnectionState(kConnected);
             newConnectionCallback(fd);
+            retryDelayMs_ = KInitRetryDelayMs;
         }
     } else {
         assert(states == kDisconnected);
     }
 }
 
-void Connection::retry(int fd) {}
+void Connection::retry(int fd) {
+    ::close(fd);
+    SetConnectionState(kDisconnected);
+    RetryCallBack_(retryDelayMs_);
+    retryDelayMs_ = std::min(retryDelayMs_ * 2, kMaxRetryDelayMs);
+}
+
+void Connection::SetTetryCallBack_(const std::function<void(int)>& callback) {
+    RetryCallBack_ = callback;
+}
 
 }  // namespace ws

@@ -1,6 +1,8 @@
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 
+#include <functional>
+
 #include "../base/config.h"
 #include "../base/nocopy.h"
 #include "../net/address.h"
@@ -13,13 +15,15 @@ class Connection : public Nocopy {
    private:
     enum ConnectionState { kDisconnected, kConnecting, kConnected };
 
-    int retryDelayMs_;  // 重连间隔时长
+    int retryDelayMs_;
     Address ServerAddress;
     ConnectionState states;
     std::shared_ptr<Epoll> ClientEpoll;
     Socket socket_;
+    std::function<void(int)> RetryCallBack_;
 
-    static const int kMaxRetryDelayMs = 30 * 1000;
+    static const int kMaxRetryDelayMs = 48;
+    static const int KInitRetryDelayMs = 1;
 
     void SetConnectionState(ConnectionState state) { states = state; }
     void Connecting(const Socket& socket);
@@ -32,15 +36,16 @@ class Connection : public Nocopy {
 
    public:
     explicit Connection(std::shared_ptr<Epoll> ptr)
-        : retryDelayMs_(500),
+        : retryDelayMs_(KInitRetryDelayMs),
           states(kDisconnected),
           ClientEpoll(ptr),
           socket_(-1),
           ServerAddress(Yuanmxc_Arch::MyIP(), Yuanmxc_Arch::MyPort()) {}
 
-    void Connect();
+    int Connect(int padding);
     void HandleWrite(int fd,
                      const std::function<void(int)>& newConnectionCallback);
+    void SetTetryCallBack_(const std::function<void(int)>& callback);
 };
 
 }  // namespace ws
