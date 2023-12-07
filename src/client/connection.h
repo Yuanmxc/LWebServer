@@ -22,11 +22,11 @@ class Connection : public Nocopy {
     Socket socket_;
     std::function<void(int)> RetryCallBack_;
 
-    static const int kMaxRetryDelayMs = 48;
-    static const int KInitRetryDelayMs = 1;
+    static const int kMaxRetryDelayMs;
+    static const int KInitRetryDelayMs;
 
     void SetConnectionState(ConnectionState state) { states = state; }
-    void Connecting(const Socket& socket);
+    void Connecting(const Socket& socket_);
     void retry(int fd);
 
     int getSocketError(int sockfd);

@@ -2,6 +2,7 @@
 #define EVENTFDWRAPPER_H_
 
 #include <sys/eventfd.h>
+#include <sys/timerfd.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -15,7 +16,9 @@ class EventFdWrapper : public Havefd {
     int Eventfd_;
 
    public:
-    EventFdWrapper() : Eventfd_(::eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK)) {}
+    EventFdWrapper()
+        : Eventfd_(
+              ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC)) {}
 
     int fd() const override { return Eventfd_; }
 
