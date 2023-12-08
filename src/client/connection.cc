@@ -124,7 +124,7 @@ void Connection::HandleWrite(
             retry(fd);
             std::cerr << "Connection::HandleWrite error.\n";
         } else {
-            std::cout << "连接成功\n";
+            std::cout << "Connect successful.\n";
             SetConnectionState(kConnected);
             newConnectionCallback(fd);
             retryDelayMs_ = KInitRetryDelayMs;
@@ -135,11 +135,15 @@ void Connection::HandleWrite(
 }
 
 void Connection::retry(int fd) {
+    std::cerr << "start reconnect, Delay is : " << retryDelayMs_ << "S.\n";
     ::close(fd);
 
     socket_.Set(-1);
     SetConnectionState(kDisconnected);
-    if (retryDelayMs_ == kMaxRetryDelayMs) return;
+    if (retryDelayMs_ == kMaxRetryDelayMs) {
+        std::cerr << "Reconnect failture, stop reconnect.\n";
+        return;
+    }
     RetryCallBack_(retryDelayMs_);
     retryDelayMs_ = std::min(retryDelayMs_ * 2, kMaxRetryDelayMs);
 }

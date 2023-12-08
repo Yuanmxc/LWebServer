@@ -64,9 +64,12 @@ void Client::Run() {
             auto& item = Event_Reault[i];
             int id = item.Return_fd();
 
-            if (id == eventfd_.fd()) {
+            if (id == eventfd_.fd()) {  // 定时事件
                 TimerWheel_->TW_Tick();
                 Epoll_->Modify(eventfd_, EpollCanRead());
+            } else if (id == Channel_.fd()) {  // 有新加入事件
+                RunAndPop();
+                Epoll_->Modify(*(Sockers_.begin()->second), EpollCanRead());
             } else if (item.check(EETRDHUP)) {  // 断开连接
                 Remove(id);
             } else if (item.check(EETCOULDREAD)) {  // 可读
