@@ -33,11 +33,11 @@ WriteLoop::COMPLETETYPE WriteLoop::Send(int length) {
             faultError = true;
         }
     }
-    if (!faultError && Remaining > 0) {  // write failture.
+    if (!faultError && Remaining > 0) {
         InsertSend(Remaining);
         return IMCOMPLETE;
     }
-    return true;
+    return COMPLETE;
 }
 
 WriteLoop::COMPLETETYPE WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
@@ -61,10 +61,8 @@ WriteLoop::COMPLETETYPE WriteLoop::DoFirst() {
 }
 
 WriteLoop::COMPLETETYPE WriteLoop::DoAll() {
-    std::cout << "发送消息\n";
     while (1) {
         auto CompleteType = DoFirst();
-        std::cout << "CompleteType = " << CompleteType << std::endl;
         if (CompleteType == COMPLETE)
             continue;
         else

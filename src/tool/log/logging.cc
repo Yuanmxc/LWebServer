@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 #include <cstdio>
-#include <sstream>
 
 namespace ws {
 

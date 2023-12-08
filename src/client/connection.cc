@@ -126,6 +126,7 @@ void Connection::HandleWrite(
         } else {
             std::cout << "Connect successful.\n";
             SetConnectionState(kConnected);
+            std::cout << "fd : " << fd << std::endl;
             newConnectionCallback(fd);
             retryDelayMs_ = KInitRetryDelayMs;
         }

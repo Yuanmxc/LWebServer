@@ -26,6 +26,7 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
 
     ssize_t sum = 0;
     ssize_t ret = 0;
+    char* strart = ptr->WritePtr();
     char* StartBuffer = ptr->WritePtr();
     while (true) {
         std::cout << "errno : " << errno << std::endl;

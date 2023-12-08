@@ -17,10 +17,15 @@ class WriteLoop : public Nocopy, public Havefd {
    public:
     enum COMPLETETYPE { IMCOMPLETE, COMPLETE, EMPTY };
     using Task = std::function<WriteLoop::COMPLETETYPE()>;
+
     WriteLoop(int fd, int length)
         : fd_(fd), User_Buffer_(std::make_unique<UserBuffer>(length)) {}
     int fd() const override { return fd_; }
 
+    int write(int bytes) { User_Buffer_->Write(bytes); }
+    int write(char* buf, int bytes) { User_Buffer_->Write(buf, bytes); }
+    int write(const char* buf, int bytes) { User_Buffer_->Write(buf, bytes); }
+    int write(const std::string& str) { User_Buffer_->Write(str); }
     int swrite(const char* format, ...);
 
     int writeable() const { return User_Buffer_->Writeable(); }
@@ -48,7 +53,7 @@ class WriteLoop : public Nocopy, public Havefd {
 
    private:
     std::unique_ptr<UserBuffer> User_Buffer_;
-    std::deque<Task> Que;
+    std::deque<Task> Que;  // 支持长连接
     int fd_;
 
     COMPLETETYPE Send(int length);

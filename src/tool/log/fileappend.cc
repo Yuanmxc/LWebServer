@@ -1,7 +1,5 @@
 #include "fileappend.h"
 
-#include <assert.h>
-
 #include "logging.h"
 namespace ws {
 
