@@ -25,6 +25,9 @@ class ParsedHeader : public Copyable, public BaseBuffer {
         memcpy(Start, Header, static_cast<size_t>(bytes));
     }
 
+    [[deprecated]] virtual std::unique_ptr<char[]> Read(int bytes) {
+        return nullptr;
+    }
     size_t Writeable() const { return length; }
     virtual char* WritePtr() { return const_cast<char*>(Header); }
 

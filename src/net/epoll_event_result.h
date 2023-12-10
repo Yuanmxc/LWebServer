@@ -2,10 +2,10 @@
 #define EPOLLEVENTRESULT_H_
 
 #include <memory>
-#include <stdexcept>
 
 #include "../base/nocopy.h"
 #include "epoll_event.h"
+
 namespace ws {
 class EpollEvent_Result final : public Nocopy {
     friend class Epoll;
@@ -14,7 +14,7 @@ class EpollEvent_Result final : public Nocopy {
     explicit EpollEvent_Result(int len)
         : array(new EpollEvent[len]), Available_length(0), All_length(len) {}
 
-    size_t size() const { return Available_length; }
+    size_t size() const& noexcept { return Available_length; }
     EpollEvent& at(size_t i) {
         if (i > Available_length) {
             throw std::out_of_range(

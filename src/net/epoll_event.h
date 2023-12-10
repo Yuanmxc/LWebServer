@@ -13,16 +13,17 @@ enum EpollEventType {
     EETCOULDREAD = ::EPOLLIN,
     EETCOULDWRITE = ::EPOLLOUT,
     EETEDGETRIGGER = ::EPOLLET,
-    EETRDHUP = ::EPOLLRDHUP,
-    EETONLYONE = ::EPOLLONESHOT,
-    EETERRNO = ::EPOLLERR,
-    EETPRI = ::EPOLLPRI,
+    EETRDHUP = ::EPOLLRDHUP,      // 对端断开连接
+    EETONLYONE = ::EPOLLONESHOT,  // 防止多线程同时读取
+    EETERRNO = ::EPOLLERR,        // 在给已经关闭的
+    EETPRI = ::EPOLLPRI,          // 外带数据
     EETHUP = ::EPOLLHUP
 };
 
+// EpollTypeBase的设置意味着我们在收到半关闭时仍然会关闭连接；
 constexpr EpollEventType EpollTypeBase() {
     return static_cast<EpollEventType>(EETEDGETRIGGER | EETONLYONE | EETRDHUP);
-}
+}  // EPOLLHUP
 constexpr EpollEventType EpollCanRead() {
     return static_cast<EpollEventType>(EpollTypeBase() | EETCOULDREAD);
 }
@@ -46,8 +47,8 @@ class EpollEvent final : public Copyable {
         : event_(epoll_event{EET, {.fd = Hf.fd()}}) {
     }  // 这样可以被Havefd的派生类构造 其中包含fd 可行
 
-    bool check(EpollEventType EET) { return event_.events & EET; }
-    bool check(std::initializer_list<EpollEventType> EET) {
+    bool check(EpollEventType EET) noexcept { return event_.events & EET; }
+    bool check(std::initializer_list<EpollEventType> EET) noexcept {
         for (auto T : EET) {
             if (!(event_.events & T)) return false;
         }

@@ -15,6 +15,7 @@ const int Connection::kMaxRetryDelayMs = 48;
 const int Connection::KInitRetryDelayMs = 1;
 
 int Connection::Connect(int padding) {
+    // 每次需要重新创建一个套接字，因为可能出现自连接的情况，端口不能再重用了；
     socket_.Set(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC,
                          IPPROTO_TCP));
     int ret = ::connect(socket_.fd(), ServerAddress.Return_Pointer(),
@@ -120,7 +121,7 @@ void Connection::HandleWrite(
         if (err) {  // 连接错误
             retry(fd);
             std::cerr << "Connection::HandleWrite error.\n";
-        } else if (isSelfConnect(fd)) {  // 出现自连接
+        } else if (isSelfConnect(fd)) {  // 出现自连接，此时重新连接就可以了
             retry(fd);
             std::cerr << "Connection::HandleWrite error.\n";
         } else {

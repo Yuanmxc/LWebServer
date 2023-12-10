@@ -10,6 +10,7 @@ file(GLOB WS_SOURCES
 "src/core/provider/.cpp"
 "src/net/.cpp"
 "src/http/.cpp"
+"src/http/FastCgi/ .cpp"
 "src/tool/.cpp"
 )
 

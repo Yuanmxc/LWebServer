@@ -36,7 +36,7 @@ constexpr const char* LogLevelName[logging::NUM_LOG_LEVELS] = {
 };
 
 struct helper {
-    helper(const char* str, unsigned len) : str_(str), len_(len) {
+    constexpr helper(const char* str, unsigned len) : str_(str), len_(len) {
         assert(strlen(str) == len_);
     }
 

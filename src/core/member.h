@@ -35,7 +35,7 @@ class Member : public Nocopy, public Havefd {
     void DoWrite();
     bool CloseAble() const;
 
-    int fd() const final { return Socket_Ptr->fd(); }
+    int fd() const& noexcept final { return Socket_Ptr->fd(); }
     void Init();
     bool IsWriteComplete() const noexcept { return WriteComplete; }
     ~Member() { Socket_Ptr->Close(); }

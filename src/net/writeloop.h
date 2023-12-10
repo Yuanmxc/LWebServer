@@ -20,12 +20,14 @@ class WriteLoop : public Nocopy, public Havefd {
 
     WriteLoop(int fd, int length)
         : fd_(fd), User_Buffer_(std::make_unique<UserBuffer>(length)) {}
-    int fd() const override { return fd_; }
+    int fd() const& override { return fd_; }
 
-    int write(int bytes) { User_Buffer_->Write(bytes); }
-    int write(char* buf, int bytes) { User_Buffer_->Write(buf, bytes); }
-    int write(const char* buf, int bytes) { User_Buffer_->Write(buf, bytes); }
-    int write(const std::string& str) { User_Buffer_->Write(str); }
+    int write(int bytes) { return User_Buffer_->Write(bytes); }
+    int write(char* buf, int bytes) { return User_Buffer_->Write(buf, bytes); }
+    int write(const char* buf, int bytes) {
+        return User_Buffer_->Write(buf, bytes);
+    }
+    int write(const std::string& str) { return User_Buffer_->Write(str); }
     int swrite(const char* format, ...);
 
     int writeable() const { return User_Buffer_->Writeable(); }

@@ -28,7 +28,7 @@ class channel : public Nocopy, public Havefd {
    public:
     explicit channel(int fd) : eventfd(fd), _Epoll_(), _Manger_(_Epoll_) {}
 
-    int fd() const override { return eventfd; }
+    int fd() const& noexcept override { return eventfd; }
 
     std::queue<int>* return_ptr() { return &ptr_que; }
 

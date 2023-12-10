@@ -32,7 +32,6 @@ class UserBuffer : public Nocopy, public BaseBuffer {
             throw std::invalid_argument("'userbuffer::read' error paramater.");
         Read_Spot += bytes;
     }
-    // void Read(std::string& str, int bytes);
     char Peek(int jump) const final;
 
     int Write(int bytes);

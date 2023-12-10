@@ -58,7 +58,7 @@ class Epoll final : public Nocopy, Havefd {
             ETT.All_length, timeout);
         ETT.Available_length = Available_Event_Number_;
     }
-    int fd() const override { return epoll_fd_; }
+    int fd() const& noexcept override { return epoll_fd_; }
 
    private:
     int epoll_fd_;

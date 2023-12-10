@@ -66,10 +66,12 @@ const char* Provider::AutoAdapt() const {
 }
 
 int Provider::RegularProvide(long Content_Length) {
-    RegularProvide(Content_Length, AutoAdapt());
+    return RegularProvide(Content_Length, AutoAdapt());
 }
 
-const char* Provider::MIME(const char* type, ptrdiff_t len) const {}
+const char* Provider::MIME(const char* type, ptrdiff_t len) const {
+    return nullptr;
+}
 
 int Provider::ProvideError() {
     static constexpr const char temp[] =
