@@ -16,20 +16,21 @@
 namespace ws {
 class Member : public Nocopy, public Havefd {
    public:
-    Member(int fd, long time = -1l)
+    explicit Member(int fd, long time = -1l)
         : Socket_Ptr(std::make_unique<Socket>(fd)),
           Time_Spot(time),
           WriteComplete(false) {
         Init();
     }
-    Member(std::unique_ptr<Socket>&& ptr, long time = -1l)
+
+    explicit Member(std::unique_ptr<Socket>&& ptr, long time = -1l)
         : Time_Spot(time), WriteComplete(false) {
         Init();
         std::swap(Socket_Ptr, ptr);
     }
     Member() = delete;
-    long TimeSpot() const { return Time_Spot; }
-    void Touch(long Time_) { Time_Spot = Time_; }
+    long TimeSpot() const& noexcept { return Time_Spot; }
+    void Touch(long Time_) noexcept { Time_Spot = Time_; }
 
     void DoRead();
     void DoWrite();

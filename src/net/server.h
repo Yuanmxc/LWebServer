@@ -1,106 +1,60 @@
-#ifndef SOCKET__H_
-#define SOCKET__H_
+#ifndef SERVER_H_
+#define SERVER_H_
 
-#include <fcntl.h>
-#include <string.h>
-#include <sys/epoll.h>
-#include <sys/socket.h>
-#include <unistd.h>
+#include <netinet/tcp.h>
 
 #include <functional>
 #include <memory>
 
-#include "../base/copyable.h"
-#include "../base/havefd.h"
-#include "../tool/userbuffer.h"
+#include "../net/address.h"
+#include "../tool/fileopen.h"
+#include "socket.h"
 
 namespace ws {
-
-class Extrabuf : public Nocopy {
-    enum isvaild { INVAILD = -1, VAILD };
+class Server : public Socket {
+    using fun = std::function<void(int)>;
 
    public:
-    void init() {
-        extrabuf = std::make_unique<char[]>(4048);
-        ExtrabufPeek = static_cast<int>(VAILD);
-    }
-    char* Get_ptr() const noexcept { return extrabuf.get(); }
+    Server(const Address& addr_)
+        : Addr_(std::make_unique<Address>(addr_)), FileOpen() {}
+    Server(const char* buffer, int port)
+        : Addr_(std::make_unique<Address>(buffer, port)), FileOpen() {}
+    explicit Server(int port)
+        : Addr_(std::make_unique<Address>(port)), FileOpen() {}
 
-    int Get_length() const noexcept { return ExtrabufPeek; }
+    std::unique_ptr<Socket> Server_Accept();
+    void Server_Accept(fun&& f);
+    void Server_BindAndListen();
 
-    void Write(int spot) noexcept { ExtrabufPeek = spot; }
+    int Set_AddrRUseA() {
+        return Set_Socket(SO_REUSEADDR, SOL_SOCKET);
+    }  // 防止服务器重启受阻
+    int Set_AddrRUseP() {
+        return Set_Socket(SO_REUSEPORT, SOL_SOCKET);
+    }  // 用于解决单线程accept的瓶颈与负载不均衡的问题，我的架构用不到这个，但它很有用；
+    int Set_KeepAlive() {
+        return Set_Socket(SO_KEEPALIVE, SOL_SOCKET);
+    }  // TCP保活机制
 
-    int WriteAble() const noexcept { return BufferSize - ExtrabufPeek; }
-
-    bool IsVaild() const noexcept {
-        return ExtrabufPeek == INVAILD ? false : true;
-        // return static_cast<bool>(ExtrabufPeek);
-    }
-
-    bool Reset() {
-        std::unique_ptr<char[]> TempPtr = std::make_unique<char[]>(BufferSize);
-        memcpy(TempPtr.get(), extrabuf.get(), BufferSize);
-        extrabuf.reset(new char[BufferSize * 2]);
-        memcpy(extrabuf.get(), TempPtr.get(), BufferSize);
-        BufferSize *= 2;
-        return true;
-    }
-
-    void SetHighWaterMarkCallback_(std::function<void()> fun) {
-        highWaterMarkCallback_ = std::move(fun);
-    }
-
-    bool IsExecutehighWaterMark() const noexcept {
-        return Get_length() >= highWaterMark_;
-    }
-
-    void Callback() {
-        if (highWaterMarkCallback_) highWaterMarkCallback_();
-    }
+    int Set_Nodelay() { return Set_Socket(TCP_NODELAY, SOL_TCP); }  // Nagle
+    int Set_COPK() {
+        return Set_Socket(TCP_CORK, SOL_TCP);
+    }  // TCP_CORK可以提升吞吐量，在确认要传输传输大于MSS的数据时使用
+    int Set_QuickAck() {
+        return Set_Socket(TCP_QUICKACK, SOL_TCP);
+    }  // 禁止延迟确认机制，减少时延
+    int Base_Setting() {
+        return Set_Socket(TCP_NODELAY | TCP_QUICKACK, SOL_TCP);
+    }                  // 减少一次系统调用
+    int Set_Linger();  // close时直接发送RST报文
 
    private:
-    static const int highWaterMark_ = 64 * 1024 * 1024;
-    std::function<void()> highWaterMarkCallback_;
-    std::unique_ptr<char[]> extrabuf = nullptr;
-    int ExtrabufPeek = static_cast<int>(isvaild::INVAILD);
-    int BufferSize = 4048;
-};
-class Socket : public Havefd, Copyable {
-   public:
-    Socket()
-        : Socket_fd_(
-              socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)) {
-        SetKeepAlive();
-        SetNoDelay();
+    std::unique_ptr<Address> Addr_;
+    fileopen FileOpen;
+    int Set_Socket(int event_type, int level) {
+        int buffer_ = 0;
+        return setsockopt(fd(), level, event_type, &buffer_, sizeof(buffer_));
     }
-    explicit Socket(int fd) : Socket_fd_(fd) {}
-    explicit Socket(const Havefd& Hf) : Socket_fd_(Hf.fd()) {}
-    explicit Socket(const Havefd&& Hf) : Socket_fd_(Hf.fd()) {}
-
-    virtual ~Socket() {
-        if (Have_Close_) ::close(Socket_fd_);
-    }
-
-    int Close();
-    int Shutdown() { return ::shutdown(Socket_fd_, SHUT_RDWR); }
-    int ShutdownWrite() { return ::shutdown(Socket_fd_, SHUT_WR); }
-    int ShutdownRead() { return ::shutdown(Socket_fd_, SHUT_RD); }
-
-    int fd() const noexcept override { return Socket_fd_; }
-    int SetNoblocking(int flag = 0);
-    int SetNoblockingCLOEXEC() { return Socket::SetNoblocking(O_CLOEXEC); }
-    int SetNoDelay();
-    int SetKeepAlive();
-
-    int Read(char* Buffer, int Length, int flag = 0);
-    int Read(std::shared_ptr<UserBuffer>, int length = -1, int flag = 0);
-
-    int Write(char* Buffer, int length, int flag = 0);
-
-   private:
-    Extrabuf ExtraBuffer_;
-    bool Have_Close_ = true;
-    int Socket_fd_;
 };
 }  // namespace ws
 

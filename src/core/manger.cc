@@ -10,20 +10,20 @@ namespace ws {
 int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType& EE) {
     int id = ptr->fd();  // RTTI
     Fd_To_Member.emplace(id, ptr.release());
-    _Epoll_.Add(*Fd_To_Member[id], EE);
+    _Epoll_.Add(*Fd_To_Member[id], std::move(EE));
     return id;
 }
 
 int Manger::Opera_Member(std::unique_ptr<Member>&& ptr, EpollEventType&& EE) {
     int id = ptr->fd();
-    Fd_To_Member.emplace(id, ptr.release());
-    _Epoll_.Add(*Fd_To_Member[id], EE);
+    Fd_To_Member.emplace(id, std::move(ptr.release()));
+    _Epoll_.Add(*Fd_To_Member[id], std::move(EE));
     return id;
 }
 
 int Manger::Opera_Member(std::unique_ptr<Member>&& ptr, EpollEventType& EE) {
     int id = ptr->fd();
-    Fd_To_Member.emplace(id, ptr.release());
+    Fd_To_Member.emplace(id, std::move(ptr.release()));
     _Epoll_.Add(*Fd_To_Member[id], EE);
     return id;
 }
@@ -31,7 +31,7 @@ int Manger::Opera_Member(std::unique_ptr<Member>&& ptr, EpollEventType& EE) {
 int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType&& EE) {
     int id = ptr->fd();
     Fd_To_Member.emplace(id, ptr.release());
-    _Epoll_.Add(*Fd_To_Member[id], EE);
+    _Epoll_.Add(*Fd_To_Member[id], std::move(EE));
     return id;
 }
 
@@ -49,6 +49,7 @@ int Manger::Update(int fd) {
     }
     _Epoll_.Modify(*Fd_To_Member[fd], EpollCanRead());
 }
+
 int Manger::UpdateWrite(int fd) {
     if (!Exist(fd)) {
         throw std::invalid_argument("'Manger::Update' Don't have this fd.");
@@ -56,16 +57,14 @@ int Manger::UpdateWrite(int fd) {
     _Epoll_.Modify(*Fd_To_Member[fd], EpollCanWite());
 }
 
-int Manger::JudgeToClose(int fd) {
+int Manger::JudgeToClose(int fd) {  // 函数没有返回值
     if (!Exist(fd)) {
         throw std::invalid_argument(
             "'Manger::JudgeToClose' Don't have this fd.");
     }
     auto& T = Fd_To_Member[fd];
-
     if (!T->IsWriteComplete()) {
         UpdateWrite(fd);
-        getchar();
         return 0;
     } else if (T->CloseAble()) {
         _Epoll_.Remove(static_cast<EpollEvent>(fd));

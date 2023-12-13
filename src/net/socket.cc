@@ -1,10 +1,11 @@
 #include "socket.h"
 
 #include <errno.h>
-#include <netinet/tcp.h>
+#include <netinet/tcp.h>  //TCP_NODELAY
 #include <sys/socket.h>
 
 #include <iostream>
+
 namespace ws {
 int Socket::Close() {
     int rv = ::close(Socket_fd_);
@@ -23,21 +24,23 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
     if (length == -1 || length > ptr->Writeable()) {
         length = ptr->Writeable();
     }
-
     ssize_t sum = 0;
     ssize_t ret = 0;
-    char* strart = ptr->WritePtr();
     char* StartBuffer = ptr->WritePtr();
     while (true) {
-        std::cout << "errno : " << errno << std::endl;
         ret = recv(Socket_fd_, StartBuffer, static_cast<size_t>(length), flag);
+        std::cout << "errno : " << errno << std::endl;
+        std::cout << "ret : " << ret << std::endl;
+
+        // 显然每次length大于等于ret
         if (ret != -1 && !ExtraBuffer_.IsVaild()) {
             sum += ret;
-            length -= ret;
+            length -= ret;  // 目前缓冲区中有效的buffer长度
             ptr->Write(ret);
             StartBuffer = ptr->WritePtr();
-            if (!ptr->Writeable()) {
-                ExtraBuffer_.init();
+
+            if (!ptr->Writeable()) {  // Buffer is full.
+                ExtraBuffer_.init();  // 初始化额外的缓冲区
                 StartBuffer = ExtraBuffer_.Get_ptr();
                 length = ExtraBuffer_.WriteAble();
             }
@@ -46,7 +49,7 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
             length -= ret;
             ExtraBuffer_.Write(ret);
             StartBuffer = ExtraBuffer_.Get_ptr();
-            if (!ExtraBuffer_.WriteAble()) {
+            if (!ExtraBuffer_.WriteAble()) {  // Extrabuffer is full.
                 if (ExtraBuffer_.IsExecutehighWaterMark()) {
                     ExtraBuffer_.Callback();
                     break;
@@ -55,15 +58,18 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
                 StartBuffer = ExtraBuffer_.Get_ptr();
                 length = ExtraBuffer_.WriteAble();
             }
-        } else if (ret < 0) {  // errno == EAGAIN || errno == EWOULDBLOCK ||
-                               // errno == EINTR
+        } else if (ret < 0) {  // ret == -1
             if (errno == EWOULDBLOCK || errno == EAGAIN)
                 break;
             else if (errno == EINTR)
                 continue;
+            else {
+                std::cerr << "ERROR : Socket::Read.\n";
+                break;
+            }
         }
     }
-    std::cout << "recv : " << sum << std::endl;
+    std::cout << "一次recv的完成 : " << sum << std::endl;
     return static_cast<int>(sum);
 }
 
@@ -77,15 +83,15 @@ int Socket::Write(char* Buffer, int length, int flag) {
                                  static_cast<ssize_t>(length), flag));
 }
 
-int Socket::SetNoDelay() {
+int Socket::SetNoDelay() {  // TCP_CORK
     int optval = 1;
-    ::setsockopt(fd(), SOL_SOCKET, TCP_NODELAY, &optval,
-                 static_cast<socklen_t>(sizeof optval));
+    return ::setsockopt(fd(), SOL_SOCKET, TCP_NODELAY, &optval,
+                        static_cast<socklen_t>(sizeof optval));
 }
 
 int Socket::SetKeepAlive() {
     int optval = 1;
-    ::setsockopt(fd(), SOL_SOCKET, SO_KEEPALIVE, &optval,
-                 static_cast<socklen_t>(sizeof optval));
+    return ::setsockopt(fd(), SOL_SOCKET, SO_KEEPALIVE, &optval,
+                        static_cast<socklen_t>(sizeof optval));
 }
 }  // namespace ws

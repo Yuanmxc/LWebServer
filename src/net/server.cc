@@ -1,6 +1,7 @@
 #include "server.h"
 
 #include <assert.h>
+#include <errno.h>
 
 #include <iostream>
 
@@ -18,25 +19,32 @@ std::unique_ptr<Socket> Server::Server_Accept() {
 }
 
 void Server::Server_Accept(fun&& f) {
-    int ret = 0;
-    ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
-    if (ret != -1) {
-        f(ret);
-        std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
-    } else if (errno == EMFILE) {
-        fileopen_helper prevent(FileOpen);
-    }
+    // 套接字被设置成非阻塞，需要一个while循环来接收
     while (1) {
         int ret = 0;
-        ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
+        ret = ::accept4(fd(), nullptr, nullptr,
+                        SOCK_NONBLOCK);  // 减少一次系统调用
         if (ret != -1) {
+            // 成功以后才会分发套接字；失败直接退出就可以了；
             f(ret);
             std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
         } else if (ret == -1 && errno == EMFILE) {
+            // 只有一个线程accept，所以此做法可以保证安全；
             fileopen_helper prevent(FileOpen);
+            // 防止堆积在全连接队列中，直接告诉对端关闭连接；
+            ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
+            ::close(fd());
             break;
-        } else if (ret == -1) {
+        } else if (ret == -1 && errno == EWOULDBLOCK) {  // EWOULDBLOCK
+            continue;
+        } else if (
+            ret ==
+            -1) {  // ECONNABORTED
+                   // 在等待队列的时候被关闭了，不是非阻塞套及字的话会一直阻塞;
             break;
+        } else {
+            std::cerr
+                << "ERROR : Server::Server_Accept, unexpected situation.\n";
         }
     }
 }

@@ -18,10 +18,11 @@
 
 namespace ws {
 
+// 每个工作线程的类
 class channel : public Nocopy, public Havefd {
    private:
     std::queue<int> ptr_que;
-    Manger _Manger_;
+    Manger _Manger_;  // 负责管理每一个线程连接
     Epoll _Epoll_;
     int eventfd;
 
@@ -30,11 +31,12 @@ class channel : public Nocopy, public Havefd {
 
     int fd() const& noexcept override { return eventfd; }
 
-    std::queue<int>* return_ptr() { return &ptr_que; }
+    std::queue<int>* return_ptr() noexcept { return &ptr_que; }
 
     friend void looping(std::promise<std::queue<int>*>& pro, int eventfd);
 };
 
+// channel_helper负责分发文件描述符
 class channel_helper : public Nocopy {
    private:
     std::vector<std::thread> pool;
@@ -43,7 +45,8 @@ class channel_helper : public Nocopy {
     std::vector<int> eventfd_;
     int RoundRobin = 0;
     static const uint64_t tool;
-    const unsigned int ThreadNumber = std::thread::hardware_concurrency() - 1;
+    const unsigned int ThreadNumber =
+        std::max<int>(1, std::thread::hardware_concurrency() - 1);
 
    public:
     channel_helper() = default;

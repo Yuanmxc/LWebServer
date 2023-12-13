@@ -23,24 +23,28 @@ class Extrabuf : public Nocopy {
     void init() {
         extrabuf = std::make_unique<char[]>(4048);
         ExtrabufPeek = static_cast<int>(VAILD);
+        highWaterMarkCallback_ = [] {};  // 默认的高水位回调为空
     }
-    char* Get_ptr() const noexcept { return extrabuf.get(); }
 
-    int Get_length() const noexcept { return ExtrabufPeek; }
+    // 返回buffer的起始地址
+    char* Get_ptr() const noexcept { return extrabuf.get() + ExtrabufPeek; }
 
-    void Write(int spot) noexcept { ExtrabufPeek = spot; }
+    int Get_length() const& noexcept { return ExtrabufPeek; }
 
-    int WriteAble() const noexcept { return BufferSize - ExtrabufPeek; }
+    void Write(int spot) noexcept { ExtrabufPeek += spot; }
 
-    bool IsVaild() const noexcept {
+    int WriteAble() const& noexcept { return BufferSize - ExtrabufPeek; }
+
+    bool IsVaild() const& noexcept {
         return ExtrabufPeek == INVAILD ? false : true;
     }
 
     bool Reset() {
         std::unique_ptr<char[]> TempPtr = std::make_unique<char[]>(BufferSize);
-        memcpy(TempPtr.get(), extrabuf.get(), BufferSize);
+        auto vaildLength = WriteAble();
+        memcpy(TempPtr.get(), extrabuf.get(), vaildLength);
         extrabuf.reset(new char[BufferSize * 2]);
-        memcpy(extrabuf.get(), TempPtr.get(), BufferSize);
+        memcpy(extrabuf.get(), TempPtr.get(), vaildLength);
         BufferSize *= 2;
         return true;
     }
@@ -58,11 +62,14 @@ class Extrabuf : public Nocopy {
     }
 
    private:
-    static const int highWaterMark_ = 64 * 1024 * 1024;
-    std::function<void()> highWaterMarkCallback_;
-    std::unique_ptr<char[]> extrabuf = nullptr;
-    int ExtrabufPeek = static_cast<int>(isvaild::INVAILD);
-    int BufferSize = 4048;
+    static const int highWaterMark_ = 64 * 1024 * 1024;  // 64MB
+    std::function<void()>
+        highWaterMarkCallback_;  // 高水位回调,缓冲区超过highWaterMark_被触发
+    std::unique_ptr<char[]> extrabuf = nullptr;  // buffer本身
+    int ExtrabufPeek = static_cast<int>(
+        isvaild::
+            INVAILD);  // ExtrabufPeek可以充当两个作用。缓冲区是否有效；buffer偏移范围；
+    int BufferSize = 4048;  // 额外buffer大小
 };
 
 class Socket : public Havefd, Copyable {
@@ -78,7 +85,7 @@ class Socket : public Havefd, Copyable {
     explicit Socket(const Havefd&& Hf) : Socket_fd_(Hf.fd()) {}
 
     virtual ~Socket() {
-        if (Have_Close_) ::close(Socket_fd_);
+        if (Have_Close_ && Socket_fd_ != -1) ::close(Socket_fd_);
     }
 
     void Set(int fd) noexcept { Socket_fd_ = fd; }

@@ -1,6 +1,7 @@
 #ifndef USERBUFFER_H_
 #define USERBUFFER_H_
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include <string>

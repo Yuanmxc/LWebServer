@@ -12,10 +12,12 @@ class Address : public Copyable {
     Address(const char *IP, int port);
     explicit Address(int port);
 
-    const sockaddr *Return_Pointer() {
+    const sockaddr *Return_Pointer() & noexcept {
         return static_cast<const sockaddr *>(static_cast<void *>(&addr_));
     }
-    constexpr size_t Return_length() { return sizeof(struct sockaddr_in); }
+    size_t Return_length() const & noexcept {
+        return sizeof(struct sockaddr_in);
+    }
 
    private:
     struct sockaddr_in addr_;
