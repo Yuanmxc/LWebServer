@@ -5,7 +5,7 @@
 
 namespace ws {
 // 向Start这个缓冲区中写入bytes个字节，并把read_slot向后移动
-void UserBuffer::Read(char *Start, int bytes) {
+void UserBuffer::Read(char* Start, int bytes) {
     if (Read_Spot + bytes > Write_Spot) {
         throw std::out_of_range(
             "'UserBuffer::Read' Out of range when reading.");
@@ -43,7 +43,7 @@ int UserBuffer::Write(int bytes) {
     return bytes;
 }
 
-int UserBuffer::Write(char *Buf, int bytes) {
+int UserBuffer::Write(char* Buf, int bytes) {
     if (bytes > Writeable()) {
         Move_Buffer();
     }
@@ -56,7 +56,7 @@ int UserBuffer::Write(char *Buf, int bytes) {
     return bytes;
 }
 
-int UserBuffer::Write(const char *Buf, int bytes) {
+int UserBuffer::Write(const char* Buf, int bytes) {
     if (bytes > Writeable()) {
         Move_Buffer();
     }
@@ -69,7 +69,7 @@ int UserBuffer::Write(const char *Buf, int bytes) {
     return bytes;
 }
 
-int UserBuffer::Write(const std::string &str) {
+int UserBuffer::Write(const std::string& str) {
     size_t len = str.length();
     if (len > Writeable()) {
         Move_Buffer();
@@ -83,7 +83,7 @@ int UserBuffer::Write(const std::string &str) {
     return static_cast<int>(len);
 }
 
-int UserBuffer::SWrite(const char *format, va_list para) {
+int UserBuffer::SWrite(const char* format, va_list para) {
     return vsnprintf(Buffer_.get() + Write_Spot,
                      static_cast<size_t>(Writeable()), format, para);
 }

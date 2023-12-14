@@ -9,7 +9,7 @@
 namespace ws {
 
 namespace detail {
-logfile::logfile(const std::string &basename, off_t rollSize, bool threadSafe,
+logfile::logfile(const std::string& basename, off_t rollSize, bool threadSafe,
                  int flushInterval, int checkEveryN)
     : basename_(basename),
       rollSize_(rollSize),
@@ -25,7 +25,7 @@ logfile::logfile(const std::string &basename, off_t rollSize, bool threadSafe,
     rollFile();
 }
 
-void logfile::append(const char *logline, int len) {
+void logfile::append(const char* logline, int len) {
     if (mutex_) {
         std::lock_guard<std::mutex> guard(*mutex_);
         append_unlocked(logline, len);
@@ -54,7 +54,7 @@ void logfile::rollFile() {
     file_.reset(new FileAppend(filename));
 }
 
-std::string logfile::getlogfileName(const std::string &basename, time_t *now) {
+std::string logfile::getlogfileName(const std::string& basename, time_t* now) {
     std::string filename;
     filename.reserve(basename.size() + 64);
     filename = basename;
@@ -76,7 +76,7 @@ std::string logfile::getlogfileName(const std::string &basename, time_t *now) {
     return filename;
 }
 
-void logfile::append_unlocked(const char *logline, int len) {
+void logfile::append_unlocked(const char* logline, int len) {
     file_->append(logline, len);
 
     if (file_->writtenBytes() >

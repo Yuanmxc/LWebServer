@@ -112,45 +112,46 @@ constexpr const char* StatusCode_to_String(int statuscode) {
     HttpStatusCode para = static_cast<HttpStatusCode>(statuscode);
     switch (para) {
         case HSCOK:
-            return "OK.";
+            return "OK";
         case HSCNoContent:
-            return "No Content.";
+            return "No Content";
         case HSCPartialContent:
-            return "Partial Content.";
+            return "Partial Content";
         case HSCMovedPermanently:
-            return "Moved Permanently.";
+            return "Moved Permanently";
         case HSCFound:
-            return "Found.";
+            return "Found";
         case HSCSeeOther:
-            return "See Other.";
+            return "See Other";
         case HSCNotModified:
-            return "Not Modified.";
+            return "Not Modified";
         case HSCTemporaryRedirect:
-            return "Temporary Redirect.";
+            return "Temporary Redirect";
         case HSCBadRequest:
-            return "Bad Request.";
+            return "Bad Request";
         case HSCUnauthorized:
-            return "Unauthorized.";
+            return "Unauthorized";
         case HSCForbidden:
-            return "Forbidden.";
+            return "Forbidden";
         case HSCNotFound:
-            return "Not Found.";
+            return "Not Found";
         case HSCInternalServerError:
-            return "Internal Server Error.";
+            return "Internal Server Error";
         case HSCServiceUnavailable:
-            return "Service Unavailable.";
+            return "Service Unavailable";
         case kHCGatewayTimeout:
-            return "Gateway Timeout.";
+            return "Gateway Timeout";
         case kHCHttpVersionNotSupported:
-            return "Http Version Not Supported.";
+            return "Http Version Not Supported";
         default:
-            return "Parser error, Don't have this httpstatuscode.";
+            return "Parser error, Don't have this httpstatuscode";
     }
 }
-inline bool isheader(char c) { return isalnum(c) || c == '-' || c == '_'; }
 
-inline bool isuri(char c) {
-    static bool isuri[] = {
+constexpr bool isheader(char c) { return isalnum(c) || c == '-' || c == '_'; }
+
+constexpr bool isuri(char c) {
+    bool isuri[] = {
         /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
         false, false, false, false, false, false, false, false,
         /*8   bs     ht     nl     vt     np     cr     so     si     15*/
@@ -187,8 +188,8 @@ inline bool isuri(char c) {
     return (c >= 0) ? isuri[c] : false;
 }
 
-inline bool isvalue(char c) {
-    static bool isvalue[] = {
+constexpr bool isvalue(char c) {
+    bool isvalue[] = {
         /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
         false, false, false, false, false, false, false, false,
         /*8   bs     ht     nl     vt     np     cr     so     si     15*/

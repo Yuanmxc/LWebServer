@@ -40,7 +40,7 @@ class channel : public Nocopy, public Havefd {
 class channel_helper : public Nocopy {
    private:
     std::vector<std::thread> pool;
-    std::vector<std::future<std::queue<int>*> > vec;
+    std::vector<std::future<std::queue<int>*>> vec;
     std::vector<std::queue<int>*> store_;
     std::vector<int> eventfd_;
     int RoundRobin = 0;

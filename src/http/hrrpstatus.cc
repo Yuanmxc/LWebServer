@@ -12,5 +12,6 @@ std::ostream& operator<<(std::ostream& os, const HttpParser_Content& para) {
     os << "V_minor : " << para.V_minor << endl;
     os << "Set_ka  : " << static_cast<int>(para.Set_Ka) << endl;
     os << "uri_length : " << para.Uri_length << endl;
+    return os;
 }
 }  // namespace ws

@@ -24,11 +24,12 @@ class Provider : public Copyable {
     int RegularProvide(long Content_Length);
     int RegularProvide(long Content_Length, const char*);
     // long int
-    const char* MIME(const char*, ptrdiff_t) const;
-    const char* AutoAdapt() const;  // 用于指定响应数据的类型和编码
-    constexpr const char* defaultMIME() const { return "text/html\n"; }
+    std::string MIME(const char*, ptrdiff_t) const;
+    std::string AutoAdapt() const;  // 用于指定响应数据的类型和编码
     bool Good() const { return _Request_->Request_good(); }
-    bool IsFilename(char) const;
+
+    static std::string defaultMIME() { return "text/html\n"; }
+    static constexpr bool IsFilename(char);
 
     virtual void provide() = 0;
 

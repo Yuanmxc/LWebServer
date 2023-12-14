@@ -4,9 +4,9 @@
 namespace ws {
 class Havefd {
    public:
-    virtual int fd() const & = 0;
+    virtual int fd() const& = 0;
 
-    bool operator==(const Havefd &para) { return fd() == para.fd(); }
+    bool operator==(const Havefd& para) { return fd() == para.fd(); }
 };
 }  // namespace ws
 

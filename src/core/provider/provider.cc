@@ -2,9 +2,9 @@
 
 #include "../../http/httpstatus.h"
 #include "../base/config.h"
-
+#include "mime.cc"
 namespace ws {
-bool Provider::IsFilename(char x) const {
+bool constexpr Provider::IsFilename(char x) {
     return !(x == '?' || x == '\\' || x == '/' || x == '*' || x == '\"' ||
              x == '\'' || x == '<' || x == '>' || x == '|');
 }
@@ -13,7 +13,7 @@ int Provider::WriteHead(int ma, int mi, const HttpStatusCode& code) {
     auto T = static_cast<int>(code);
     int ret = _Write_Loop_->swrite("HTTP/%d.%d %d %s\r\n", ma, mi, T,
                                    StatusCode_to_String(T));
-    ret += _Write_Loop_->swrite("Server: Yuanmxc_Arch %s\r\n",
+    ret += _Write_Loop_->swrite("Server: MxcServer(Yuanmxc_Arch) %s\r\n",
                                 Yuanmxc_Arch::Version());
     return ret;
 }
@@ -44,12 +44,13 @@ int Provider::RegularProvide(long Content_Length, const char* Content_Type) {
     ret += WriteDate();
     ret += WriteConnection();
     ret += WriteItem("Content-Type: %s", Content_Type);
-    ret +=
-        WriteItem("Content-Length %s", std::to_string(Content_Length).c_str());
+    ret += WriteItem("\nContent-Length: %s",
+                     std::to_string(Content_Length).c_str());
+    ret += WriteItem("\nContent-Language: %s", "en-US");
     return ret;
 }
 
-const char* Provider::AutoAdapt() const {
+std::string Provider::AutoAdapt() const {
     const char* Start =
         _Request_->Return_Uri().ReadPtr() + _Request_->Return_Uri().Length();
     const char* End = Start;
@@ -62,15 +63,19 @@ const char* Provider::AutoAdapt() const {
             End = Start;
         }
     }
-    return defaultMIME();
+    return Start == temp ? defaultMIME()
+                         : MIME(Start, std::distance(Start, End));
 }
 
 int Provider::RegularProvide(long Content_Length) {
-    return RegularProvide(Content_Length, AutoAdapt());
+    return RegularProvide(Content_Length, AutoAdapt().c_str());
 }
 
-const char* Provider::MIME(const char* type, ptrdiff_t len) const {
-    return nullptr;
+FastFindMIMEMatcher FindMIME;
+
+std::string Provider::MIME(const char* type, ptrdiff_t len) const {
+    auto res = FindMIME.get(std::string(type, len));
+    return res == std::string("nullptr") ? nullptr : res;
 }
 
 int Provider::ProvideError() {

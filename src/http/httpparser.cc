@@ -20,9 +20,11 @@ bool HttpParser::SetRequesting() {
     Request_Result->Set_Flag(Parser_Result->Set_Ka);
 
     Request_Result->Set_Fault(Parser_Result->Fault);
-    if (Parser_Result->Uri != nullptr)
+    if (Parser_Result->Uri != nullptr) {
         Request_Result->Set_Uri(
             {Parser_Result->Uri, Parser_Result->Uri_length});
+    }
+
     Request_Result->Set_Request_Buffer(User_Buffer_);
 
     return true;
@@ -77,7 +79,7 @@ bool HttpParser::Parsering() {
 
     // Parser_Result->Status初始状态为HPSOK
     while (Parser_Result->Status != HPSGAMEOVER && User_Buffer_->Readable()) {
-        const char ch = User_Buffer_->Peek(0);  // 去取buffer中第一个可读的字符
+        const char ch = User_Buffer_->Peek(0);
         switch (Parser_Result->Status) {
             case HPSOK:
                 If_Conversion(ch == 'G', HPSGET);     // GET
@@ -158,6 +160,7 @@ bool HttpParser::Parsering() {
                            Parser_Result->Header = User_Buffer_->ReadPtr(););
                 Set_Fault(HPFInvaildHeader);
             case HPSCRLFCR:
+                // 解析结束的标记，两个CR+LF
                 If_Con_Exe(ch == LF, HPSGAMEOVER,
                            Parser_Result->Fault = HPFContent;);
                 Set_Fault(HPFCRLFCR);

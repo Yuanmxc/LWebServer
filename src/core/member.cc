@@ -16,8 +16,10 @@ void Member::DoRead() {
 
     // step3: 开始http解析
     Http_Parser_->Starting_Parser();
-    if (Http_Parser_->Finished()) {
-        Content_Provider_->Provide();
+    if (Http_Parser_
+            ->Finished()) {  // 不等于HFSOK证明至少解析了一项，也就是者少解析已经开始，成不成功就不一定了；
+        Content_Provider_
+            ->Provide();  // Http_Request_和Write_Loop_都在Content_Provider_中；Http_Request_其中存储着解析http报文的状态
     }
     if (Write_Loop_->DoAll() != WriteLoop::IMCOMPLETE) {
         WriteComplete = true;
