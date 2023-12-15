@@ -3,11 +3,11 @@
 
 #include <memory>
 
-#include "../base/nocopy.h"
-#include "../http/httprequest.h"
-#include "../net/writeloop.h"
-#include "provider/provider.h"
-#include "provider/reaprovider.h"
+#include "../../base/nocopy.h"
+#include "../../http/httprequest.h"
+#include "../../tool/writeloop.h"
+#include "provider.h"
+#include "reaprovider.h"
 
 namespace ws {
 

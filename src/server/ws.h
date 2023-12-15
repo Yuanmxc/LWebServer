@@ -2,9 +2,9 @@
 #define WS_H_
 
 #include "../net/epoll.h"
-#include "../net/server.h"
 #include "channel.h"
 #include "manger.h"
+#include "server.h"
 
 namespace ws {
 class Web_Server {

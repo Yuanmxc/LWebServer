@@ -13,7 +13,10 @@ class logstream {
    public:
     using Buffer = FixedBuffer<SmallBuffer>;
 
-    self& operator<<(bool flag) { buffer_.append(flag ? "1" : "0", 1); }
+    self& operator<<(bool flag) {
+        buffer_.append(flag ? "1" : "0", 1);
+        return *this;
+    }
 
     self& operator<<(short);
     self& operator<<(unsigned short);

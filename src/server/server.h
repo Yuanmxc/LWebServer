@@ -7,8 +7,8 @@
 #include <memory>
 
 #include "../net/address.h"
+#include "../net/socket.h"
 #include "../tool/fileopen.h"
-#include "socket.h"
 
 namespace ws {
 class Server : public Socket {

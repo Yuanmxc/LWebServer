@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-#include "../../base/nocopy.h"
+#include "../base/nocopy.h"
 
 namespace ws {
 

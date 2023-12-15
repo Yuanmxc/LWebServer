@@ -8,7 +8,7 @@
 #include <thread>
 #include <vector>
 
-#include "../../base/nocopy.h"
+#include "../base/nocopy.h"
 #include "Fixedbuffer.h"
 
 namespace ws {

@@ -8,10 +8,10 @@
 #include "../base/nocopy.h"
 #include "../http/httpparser.h"
 #include "../http/httprequest.h"
+#include "../http/provider/contentprovide.h"
 #include "../net/socket.h"
-#include "../net/writeloop.h"
 #include "../tool/userbuffer.h"
-#include "contentprovide.h"
+#include "../tool/writeloop.h"
 
 namespace ws {
 class Member : public Nocopy, public Havefd {

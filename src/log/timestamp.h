@@ -4,7 +4,7 @@
 #include <boost/operators.hpp>
 #include <string>
 
-#include "../../base/copyable.h"
+#include "../base/copyable.h"
 namespace ws {
 namespace detail {
 class Timestamp : public Copyable,

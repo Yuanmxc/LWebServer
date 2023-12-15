@@ -4,9 +4,9 @@
 #include <memory>
 
 #include "../../http/httprequest.h"
-#include "../../net/writeloop.h"
 #include "../../tool/filereader.h"
-#include "../../tool/parsed_header.h"
+#include "../../tool/writeloop.h"
+#include "../parsed_header.h"
 #include "provider.h"
 
 namespace ws {

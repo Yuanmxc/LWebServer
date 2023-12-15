@@ -5,7 +5,7 @@
 #include "../../http/FastCgi/fastcgi.h"
 #include "../../http/httpstatus.h"
 #include "../../tool/filereader.h"
-#include "../../tool/parsed_header.h"
+#include "../parsed_header.h"
 namespace ws {
 
 void REAProvider::provide() {
