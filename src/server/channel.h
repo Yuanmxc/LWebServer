@@ -33,7 +33,7 @@ class channel : public Nocopy, public Havefd {
 
     std::queue<int>* return_ptr() noexcept { return &ptr_que; }
 
-    friend void looping(std::promise<std::queue<int>*>& pro, int eventfd);
+    friend void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index);
 };
 
 // channel_helper负责分发文件描述符
@@ -45,8 +45,8 @@ class channel_helper : public Nocopy {
     std::vector<int> eventfd_;
     int RoundRobin = 0;
     static const uint64_t tool;
-    const unsigned int ThreadNumber =
-        std::max<int>(1, std::thread::hardware_concurrency() - 1);
+    const int ThreadNumber = std::thread::hardware_concurrency();
+    const unsigned int RealThreadNumber = std::max<int>(1, ThreadNumber - 1);
 
    public:
     channel_helper() = default;

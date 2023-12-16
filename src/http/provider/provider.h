@@ -7,7 +7,7 @@
 #include "../../base/copyable.h"
 #include "../../http/httprequest.h"
 #include "../../http/httpstatus.h"
-#include "../../net/writeloop.h"
+#include "../../tool/writeloop.h"
 
 namespace ws {
 class Provider : public Copyable {

@@ -27,7 +27,6 @@ void Server::Server_Accept(fun&& f) {
         if (ret != -1) {
             // 成功以后才会分发套接字；失败直接退出就可以了；
             f(ret);
-            std::cout << "已接收一个新的连接 fd : " << ret << std::endl;
         } else if (ret == -1 && errno == EMFILE) {
             // 只有一个线程accept，所以此做法可以保证安全；
             fileopen_helper prevent(FileOpen);

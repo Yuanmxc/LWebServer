@@ -1,15 +1,33 @@
 #include "channel.h"
 
-#include "member.h"
+#include <sched.h>
+#include <sys/sysinfo.h>
+#include <sys/types.h>
 
+#include "member.h"
 namespace ws {
 
-void looping(std::promise<std::queue<int>*>& pro, int eventfd) {
-    while (true) {  // 这个线程不能退出，搞一个死循环
+bool SetCPUaffinity(int param) {
+    cpu_set_t mask;
+    int a = param;
+
+    CPU_ZERO(&mask);
+    CPU_SET(a, &mask);
+    // 第一个参数为零的时候默认为调用线程
+    if (sched_setaffinity(0, sizeof(mask), &mask) == -1) {  // 设置线程CPU亲和力
+        return false;
+    } else {
+        return true;
+    }
+}
+
+void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index) {
+    channel rea(eventfd);
+    pro.set_value(rea.return_ptr());
+    rea._Epoll_.Add(rea, EpollCanRead());
+    SetCPUaffinity(index);
+    while (true) {
         try {
-            channel rea(eventfd);  // 非异常安全
-            pro.set_value(rea.return_ptr());
-            rea._Epoll_.Add(rea, EpollCanRead());
             EpollEvent_Result Event_Reault(Yuanmxc_Arch::EventResult_Number());
 
             while (true) {
@@ -54,11 +72,11 @@ const uint64_t channel_helper::tool = 1;
 
 // 先把工作线程创建好
 void channel_helper::loop() {
-    for (unsigned int i = 0; i < ThreadNumber; i++) {
+    for (unsigned int i = 0; i < RealThreadNumber; i++) {
         std::promise<std::queue<int>*> Temp;
         vec.push_back(Temp.get_future());
         int fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-        pool.push_back(std::thread(looping, std::ref(Temp), fd));
+        pool.push_back(std::thread(looping, std::ref(Temp), fd, i%ThreadNumber));
         pool.back().detach();
         store_.push_back(vec[i].get());
         eventfd_.push_back(fd);
@@ -69,7 +87,7 @@ void channel_helper::loop() {
 void channel_helper::Distribution(int fd) {
     store_[RoundRobin]->push(fd);
     write(eventfd_[RoundRobin], &channel_helper::tool, sizeof(tool));
-    RoundRobin = (RoundRobin + 1) % ThreadNumber;
+    RoundRobin = (RoundRobin + 1) % RealThreadNumber;
 }
 
 }  // namespace ws

@@ -61,8 +61,17 @@ bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
     memcpy(release_ptr2, y.ReadPtr(), y.Readable());
     release_ptr2[y.Readable()] = '\0';
 
-    file = std::make_shared<FileReader>(static_cast<FileProxy>(str.c_str()),
-                                        release_ptr2);
+    if (y.Readable() == 1 &&
+        release_ptr2[0] == '/') {  // 默认情况打开index.html
+        // TODO 改为相对路径
+        file = std::make_shared<FileReader>(
+            "/home/lizhaolong/Desktop/Exercise/RabbitServer/src/index.html");
+    } else {
+        file = std::make_shared<FileReader>(
+            static_cast<FileProxy>(str.c_str())  // 构造函数中已经open了
+            ,
+            release_ptr2);
+    }
 
     if (!file->Fd_Good() || file->IsTextFile()) {
         _Request_->Set_StatusCode(HSCForbidden);

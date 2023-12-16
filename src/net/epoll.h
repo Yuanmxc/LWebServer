@@ -37,12 +37,10 @@ class Epoll final : public Nocopy, Havefd {
     }
 
     int Remove(EpollEvent& para) {
-        std::cout << "已断开一个连接 : " << epoll_fd_ << std::endl;
         return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, para.Return_fd(),
                          para.Return_Pointer());
     }
     int Remove(EpollEvent&& para) {
-        std::cout << "已断开一个连接 : " << epoll_fd_ << std::endl;
         return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, para.Return_fd(),
                          para.Return_Pointer());
     }

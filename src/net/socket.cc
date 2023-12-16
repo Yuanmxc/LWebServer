@@ -26,11 +26,10 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
     }
     ssize_t sum = 0;
     ssize_t ret = 0;
+    char* strart = ptr->WritePtr();
     char* StartBuffer = ptr->WritePtr();
     while (true) {
         ret = recv(Socket_fd_, StartBuffer, static_cast<size_t>(length), flag);
-        std::cout << "errno : " << errno << std::endl;
-        std::cout << "ret : " << ret << std::endl;
 
         // 显然每次length大于等于ret
         if (ret != -1 && !ExtraBuffer_.IsVaild()) {
@@ -69,7 +68,7 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
             }
         }
     }
-    std::cout << "一次recv的完成 : " << sum << std::endl;
+    std::string str(strart, ptr->Readable());
     return static_cast<int>(sum);
 }
 
