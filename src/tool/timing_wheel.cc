@@ -12,25 +12,24 @@ namespace ws {
 #define FIRST_INDEX(v) ((v)&TVR_MASK)
 #define NTH_INDEX(v, n) (((v) >> (TVR_BITS + (n)*TVN_BITS)) & TVN_MASK)
 
-void TimerWheel::TW_Add(int fd, Fun para, int ticks) {
+void TimerWheel::TW_Add(int fd, Fun fun, int ticks) {
     if (ticks < 0)
         throw std::invalid_argument("'Timer_Wheel::TW_Add' : error parameter.");
     int ex = currenttime + ticks;
-    _TW_Add_(fd, ex, para);
+    _TW_Add_(fd, ex, fun);
 }
 
 void TimerWheel::_TW_Add_(int fd, int ex, Fun& para) {
     if (mp.find(fd) != mp.end())
         throw std::invalid_argument("'TimerWheel::_TW_Add_ error parameter.'");
     uint32_t ex_ = static_cast<uint32_t>(ex);
-    uint32_t idx = ex_ - currenttime;
+    uint32_t idx = ex_ - currenttime;  // 用期望时间减去现在的时间就是要放入下标
     auto ptr = std::make_shared<timernode>(FIRST_INDEX(ex_), fd, ex_, para);
     if (idx < TVR_SIZE) {
         ptr->Set_Wheel(0);
         tvroot[FIRST_INDEX(ex_)].emplace_back(std::move(ptr));
-        std::cout << fd << " : " << tvroot[FIRST_INDEX(ex_)].size()
-                  << std::endl;
-        mp[fd] = --(tvroot[FIRST_INDEX(ex_)].end());
+        mp[fd] =
+            --(tvroot[FIRST_INDEX(ex_)].end());  // 保存响应的迭代器 用作更新
     } else {
         uint64_t sz;
         for (int i = 0; i < 4; ++i) {
@@ -51,7 +50,7 @@ void TimerWheel::TW_Tick() {
     ++currenttime;
     uint32_t currtick = currenttime;
     int index = (currtick & TVR_MASK);
-    if (index == 0) {
+    if (index == 0) {  // 从更高级别的轮盘中取出事件
         int i = 0;
         int idx = 0;
         do {

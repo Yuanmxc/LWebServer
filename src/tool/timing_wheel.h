@@ -40,7 +40,7 @@ class TimerWheel {
    public:
     TimerWheel() : currenttime(0) {}
 
-    void TW_Add(int fd, Fun, int ticks = 2);
+    void TW_Add(int fd, Fun fun, int ticks = 2);
     void TW_Tick();
     void TW_Update(int fd);
 

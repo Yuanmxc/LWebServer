@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <cstdio>
+#include <sstream>
 
 namespace ws {
 
@@ -15,7 +16,7 @@ thread_local char t_time[64];
 thread_local time_t t_lastSecond;
 
 const char* strerror_tl(int old_errno) {
-    return (char*)strerror_r(old_errno, t_errnoBuf, sizeof(t_errnoBuf));
+    return strerror_r(old_errno, t_errnoBuf, sizeof(t_errnoBuf));
 }
 
 logging::Loglevel initLogLevel() {
@@ -25,10 +26,16 @@ logging::Loglevel initLogLevel() {
         return logging::INFO;
 }
 
-constexpr logging::Loglevel g_logLevel = initLogLevel();
+void defaultOutput(const char* msg, int len) {
+    size_t n = fwrite(msg, 1, len, stdout);
+    (void)n;
+}
+
+void defaultFlush() { fflush(stdout); }
+
+logging::Loglevel g_logLevel = initLogLevel();
 logging::OutputFun g_output_(defaultOutput);
 logging::FlushFun g_flush_(defaultFlush);
-
 TimeZone g_logTimeZone;
 
 constexpr const char* LogLevelName[logging::NUM_LOG_LEVELS] = {
@@ -49,14 +56,12 @@ inline logstream& operator<<(logstream& s, const helper& v) {
     return s;
 }
 
-void defaultOutput(const char* msg, int len) {
-    size_t n = fwrite(msg, 1, len, stdout);
-    (void)n;
+inline logstream& operator<<(logstream& s, const logging::Filewrapper& v) {
+    s.append(v.data_, v.size_);
+    return s;
 }
 
-void defaultFlush() { fflush(stdout); }
-
-void logging::setLoglevel(Loglevel level) { g_Loglevel = level; }
+void logging::setLoglevel(Loglevel level) { g_logLevel = level; }
 
 void logging::setFlush(FlushFun fun) { g_flush_ = fun; }
 
@@ -77,15 +82,7 @@ logging::logging(Filewrapper file, int line, Loglevel level, const char* str)
 logging::logging(Filewrapper file, int line, bool toAbort)
     : wrapper_(toAbort ? FATAL : ERROR, errno, file, line) {}
 
-logging::~logging() {
-    // wrapper_.finish();
-    // const logstream::Buffer& buf(stream().buffer());
-    // g_output_(buf.data(), buf.Length());
-    // if (wrapper_.level_ == FATAL) {
-    //     g_flush_();
-    //     abort();
-    // }
-}
+logging::~logging() {}
 
 logging::Funwrapper::Funwrapper(Loglevel level, int old_errno,
                                 const Filewrapper& file, int line)
@@ -93,15 +90,7 @@ logging::Funwrapper::Funwrapper(Loglevel level, int old_errno,
       stream_(),
       level_(level),
       line_(line),
-      basename_(file) {
-    // formatTime();
-    // std::string str("111111");
-    // stream_ << helper(str.c_str(), 6);
-    // stream_ << helper(LogLevelName[static_cast<size_t>(level)], 6);
-    // if (old_errno != 0) {
-    //     stream_ << strerror_tl(old_errno) << " (errno=" << old_errno << ") ";
-    // }
-}
+      basename_(file) {}
 
 void logging::Funwrapper::formatTime() {
     int64_t microSecondsSinceEpoch = time_.Data_microsecond();

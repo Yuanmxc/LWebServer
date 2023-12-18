@@ -24,7 +24,7 @@ class Manger : public Copyable {
     int Opera_Member(std::unique_ptr<Member>&, EpollEventType&&);
     int Opera_Member(std::unique_ptr<Member>&&, EpollEventType&);
 
-    void TimeWheel(int fd);
+    void InsertTimeWheel(int fd);
 
     void Reading(int fd, long time = -1);
     void Writing(int fd, long time = -1);

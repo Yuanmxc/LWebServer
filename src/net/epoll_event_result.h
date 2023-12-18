@@ -15,6 +15,7 @@ class EpollEvent_Result final : public Nocopy {
         : array(new EpollEvent[len]), Available_length(0), All_length(len) {}
 
     size_t size() const& noexcept { return Available_length; }
+
     EpollEvent& at(size_t i) {
         if (i > Available_length) {
             throw std::out_of_range(
@@ -28,6 +29,7 @@ class EpollEvent_Result final : public Nocopy {
             throw std::out_of_range("'EpollEvent_Result : []' Out of Bounds.");
         return array[i];
     }
+
     EpollEvent& operator[](size_t i) {
         return const_cast<EpollEvent&>(
             static_cast<const EpollEvent_Result&>(*this)[i]);

@@ -15,7 +15,7 @@ class FileReader : public FileProxy {
         : FileProxy(proxy, str.c_str()) {}
 
     ssize_t SendFile(int Socket_Fd);
-    bool Send_End() const { return length == offest; }
+    bool Send_End() const& { return length == offest; }
 
    private:
     __off_t length = FileSize();

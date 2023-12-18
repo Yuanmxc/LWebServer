@@ -1,8 +1,9 @@
 #include "provider.h"
 
+#include "../../base/config.h"
 #include "../../http/httpstatus.h"
-#include "../base/config.h"
 #include "mime.cc"
+
 namespace ws {
 bool constexpr Provider::IsFilename(char x) {
     return !(x == '?' || x == '\\' || x == '/' || x == '*' || x == '\"' ||
@@ -78,10 +79,22 @@ std::string Provider::MIME(const char* type, ptrdiff_t len) const {
     return res == std::string("nullptr") ? nullptr : res;
 }
 
+constexpr size_t Getstrlen(const char* str) {
+    if (str == nullptr) return 0;
+    size_t len = 0;
+    char ch = *str;
+    while (ch != '\0') {
+        len++;
+        str++;
+        ch = *str;
+    }
+    return len;
+}
+
 int Provider::ProvideError() {
     static constexpr const char temp[] =
-        "<html><head><title>Ymxc/HTTP Error</title></head>";
-    size_t len = strlen(temp);
+        "<html><head><title>MxcServer/HTTP Error</title></head>";
+    auto len = Getstrlen(temp);
     _Request_->Set_StatusCode(HSCBadRequest);
     int ret = RegularProvide(len - 1);
     ret += WriteCRLF();

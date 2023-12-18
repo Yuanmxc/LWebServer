@@ -33,14 +33,15 @@ class channel : public Nocopy, public Havefd {
 
     std::queue<int>* return_ptr() noexcept { return &ptr_que; }
 
-    friend void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index);
+    friend void looping(std::promise<std::queue<int>*>& pro, int eventfd,
+                        int index);
 };
 
 // channel_helper负责分发文件描述符
 class channel_helper : public Nocopy {
    private:
     std::vector<std::thread> pool;
-    std::vector<std::future<std::queue<int>*>> vec;
+    std::vector<std::future<std::queue<int>*> > vec;
     std::vector<std::queue<int>*> store_;
     std::vector<int> eventfd_;
     int RoundRobin = 0;

@@ -6,7 +6,6 @@
 
 namespace ws {
 void HttpParser::Again_Parser() {
-    User_Buffer_->Clean();
     Parser_Result.release();
     Parser_Result = std::make_unique<HttpParser_Content>();
 }

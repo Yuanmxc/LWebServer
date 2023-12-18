@@ -26,7 +26,8 @@ void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index) {
     pro.set_value(rea.return_ptr());
     rea._Epoll_.Add(rea, EpollCanRead());
     SetCPUaffinity(index);
-    while (true) {
+
+    while (true) {  // 这个线程不能退出，死循环
         try {
             EpollEvent_Result Event_Reault(Yuanmxc_Arch::EventResult_Number());
 
@@ -61,7 +62,7 @@ void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index) {
                 }
             }
         } catch (...) {
-            std::cerr << "error in : " << std::this_thread::get_id()
+            std::cerr << "Error in : " << std::this_thread::get_id()
                       << std::endl;
         }
     }
@@ -76,7 +77,8 @@ void channel_helper::loop() {
         std::promise<std::queue<int>*> Temp;
         vec.push_back(Temp.get_future());
         int fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-        pool.push_back(std::thread(looping, std::ref(Temp), fd, i%ThreadNumber));
+        pool.push_back(
+            std::thread(looping, std::ref(Temp), fd, i % ThreadNumber));
         pool.back().detach();
         store_.push_back(vec[i].get());
         eventfd_.push_back(fd);

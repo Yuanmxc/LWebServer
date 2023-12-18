@@ -22,17 +22,22 @@ class logfile : public Nocopy {
 
    private:
     void append_unlocked(const char* logline, int len);
+
     static std::string getlogfileName(const std::string& basename, time_t* now);
+
     const std::string basename_;
     const off_t rollSize_;
     const int flushInterval_;
     const int checkEveryN_;
+
     int count_;
+
     std::unique_ptr<std::mutex> mutex_;
     time_t startOfPeriod_;
     time_t lastRoll_;
     time_t lastFlush_;
     std::unique_ptr<FileAppend> file_;
+
     constexpr const static int Daypreseconds = 60 * 60 * 24;
 };
 

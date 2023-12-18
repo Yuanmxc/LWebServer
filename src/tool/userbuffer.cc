@@ -1,14 +1,13 @@
 #include "userbuffer.h"
 
 #include <cstring>
-#include <stdexcept>
 
 namespace ws {
 // 向Start这个缓冲区中写入bytes个字节，并把read_slot向后移动
 void UserBuffer::Read(char* Start, int bytes) {
     if (Read_Spot + bytes > Write_Spot) {
         throw std::out_of_range(
-            "'UserBuffer::Read' Out of range when reading.");
+            "'UserBuffer::Read' Out ou range when reading.");
     }
     memcpy(Start, Buffer_.get() + Read_Spot, static_cast<size_t>(bytes));
     Read_Spot += static_cast<size_t>(bytes);
@@ -17,7 +16,7 @@ void UserBuffer::Read(char* Start, int bytes) {
 std::unique_ptr<char[]> UserBuffer::Read(int bytes) {
     if (Read_Spot + bytes > Write_Spot) {
         throw std::out_of_range(
-            "'UserBuffer::Read' Out of range when reading.");
+            "'UserBuffer::Read' Out ou range when reading.");
     }
     std::unique_ptr<char[]> ptr(new char(Readable()));
     memcpy(ptr.get(), Buffer_.get() + Read_Spot, static_cast<size_t>(bytes));

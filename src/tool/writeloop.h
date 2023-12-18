@@ -18,7 +18,7 @@ class WriteLoop : public Nocopy, public Havefd {
     enum COMPLETETYPE { IMCOMPLETE, COMPLETE, EMPTY };
     using Task = std::function<WriteLoop::COMPLETETYPE()>;
 
-    WriteLoop(int fd, int length)
+    explicit WriteLoop(int fd, int length = 4096)
         : fd_(fd), User_Buffer_(std::make_unique<UserBuffer>(length)) {}
     int fd() const& override { return fd_; }
 
@@ -34,11 +34,6 @@ class WriteLoop : public Nocopy, public Havefd {
     void Move_Buffer() { User_Buffer_->Move_Buffer(); }
     size_t WSpot() const noexcept { return User_Buffer_->WSpot(); }
     void Rewrite(int spot) noexcept { return User_Buffer_->ReWirte(spot); }
-
-    void AddTask(int len) {
-        Que.emplace_back([this, len] { return Send(len); });
-    }
-    void AddTask() { AddTask(User_Buffer_->Readable()); }
 
     void AddSend(int length) {
         Que.emplace_back([this, length] { return Send(length); });

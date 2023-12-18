@@ -26,12 +26,13 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
     }
     ssize_t sum = 0;
     ssize_t ret = 0;
+
     char* strart = ptr->WritePtr();
+
     char* StartBuffer = ptr->WritePtr();
     while (true) {
         ret = recv(Socket_fd_, StartBuffer, static_cast<size_t>(length), flag);
 
-        // 显然每次length大于等于ret
         if (ret != -1 && !ExtraBuffer_.IsVaild()) {
             sum += ret;
             length -= ret;  // 目前缓冲区中有效的buffer长度
@@ -51,6 +52,7 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
             if (!ExtraBuffer_.WriteAble()) {  // Extrabuffer is full.
                 if (ExtraBuffer_.IsExecutehighWaterMark()) {
                     ExtraBuffer_.Callback();
+                    // return -1;
                     break;
                 }
                 ExtraBuffer_.Reset();

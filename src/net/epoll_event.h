@@ -13,10 +13,11 @@ enum EpollEventType {
     EETCOULDREAD = ::EPOLLIN,
     EETCOULDWRITE = ::EPOLLOUT,
     EETEDGETRIGGER = ::EPOLLET,
-    EETRDHUP = ::EPOLLRDHUP,      // 对端断开连接
-    EETONLYONE = ::EPOLLONESHOT,  // 防止多线程同时读取
-    EETERRNO = ::EPOLLERR,        // 在给已经关闭的
-    EETPRI = ::EPOLLPRI,          // 外带数据
+    EETRDHUP = ::EPOLLRDHUP,
+    EETONLYONE = ::EPOLLONESHOT,
+    EETERRNO = ::EPOLLERR,
+    EETPRI = ::EPOLLPRI,
+
     EETHUP = ::EPOLLHUP
 };
 
@@ -56,6 +57,7 @@ class EpollEvent final : public Copyable {
         }
         return true;
     }
+
     epoll_event* Return_Pointer() noexcept { return &event_; }
     int Return_fd() const noexcept { return event_.data.fd; }
     uint32_t Return_EET() const noexcept { return event_.events; }

@@ -15,7 +15,6 @@ class BaseBuffer {
     virtual char Peek(int jump) const = 0;
     virtual size_t Length() const = 0;
 };
-
 }  // namespace ws
 
 #endif

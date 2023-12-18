@@ -26,7 +26,7 @@ int Connection::Connect(int padding) {
         case EINPROGRESS:  // 正在连接
         case EINTR:  // 当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个EINTR错误。
         case EISCONN:  // 连接成功
-            retry(socket_.fd());
+            Connecting(socket_);
             break;
 
         case EAGAIN:         // 临时端口(ephemeral port)不足

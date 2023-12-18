@@ -1,7 +1,7 @@
 #ifndef FASTCGI_H_
 #define FASTCGI_H_
 
-#include "../../net/socket.h"
+#include "../net/socket.h"
 #include "fastcgiHeader.h"
 
 namespace ws {

@@ -16,8 +16,7 @@ namespace ws {
 namespace detail {
 class AsyncLogging : public Nocopy {
    public:
-    AsyncLogging(const std::string& basename,
-                 off_t rollsize,  // long int文件缓冲区中需要刷新时的字节数
+    AsyncLogging(const std::string& basename, off_t rollsize,
                  size_t flushInterval = 3);
 
     void start();

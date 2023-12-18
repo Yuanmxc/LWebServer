@@ -1,8 +1,6 @@
 #ifndef DATA_H_
 #define DATA_H_
 
-// #include <types.h>
-
 #include <algorithm>
 #include <string>
 
@@ -13,9 +11,9 @@ namespace ws {
 class Date : public Copyable {
    public:
     struct YearMonthDay {
-        int year;
-        int month;
-        int day;
+        int year;   // [1900..2500]
+        int month;  // [1..12]
+        int day;    // [1..31]
     };
 
     static constexpr const int kDaysPerWeek = 7;

@@ -1,3 +1,5 @@
+
+
 #include "ws.h"
 
 #include <assert.h>
@@ -23,8 +25,10 @@ Web_Server::Web_Server()
 void Web_Server::Running() {
     try {
         signal(SIGPIPE, SIG_IGN);
+
         std::ios::sync_with_stdio(false);
         std::cin.tie(nullptr);
+
         _Server_.Set_AddrRUseA();
         _Server_.Base_Setting();
         _Server_.Server_BindAndListen();

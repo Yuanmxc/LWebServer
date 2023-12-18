@@ -2,10 +2,11 @@
 
 #include <string>
 
-#include "../../http/FastCgi/fastcgi.h"
+#include "../../FastCgi/fastcgi.h"
 #include "../../http/httpstatus.h"
 #include "../../tool/filereader.h"
 #include "../parsed_header.h"
+
 namespace ws {
 
 void REAProvider::provide() {
@@ -35,10 +36,13 @@ void REAProvider::provide() {
     } else if (FileProvider(file)) {
         int ret = RegularProvide(file->FileSize());
         ret += WriteCRLF();
+
         _Write_Loop_->AddSend(ret);
         _Write_Loop_->AddSendFile(file);
+
         ret = WriteCRLF();
         _Write_Loop_->AddSend(ret);
+
     } else {
         ProvideError();
     }
@@ -46,7 +50,6 @@ void REAProvider::provide() {
 
 bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
     if (!Good()) {
-        std::cout << _Request_->Return_Flag() << std::endl;
         _Request_->Set_StatusCode(HSCBadRequest);
         return false;
     }
@@ -63,9 +66,8 @@ bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
 
     if (y.Readable() == 1 &&
         release_ptr2[0] == '/') {  // 默认情况打开index.html
-        // TODO 改为相对路径
         file = std::make_shared<FileReader>(
-            "/home/lizhaolong/Desktop/Exercise/RabbitServer/src/index.html");
+            "/home/Yuanmxc/repository/MxcServer/src/index.html");
     } else {
         file = std::make_shared<FileReader>(
             static_cast<FileProxy>(str.c_str())  // 构造函数中已经open了
@@ -77,8 +79,9 @@ bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
         _Request_->Set_StatusCode(HSCForbidden);
         return false;
     }
+
     if (!file) {
-        _Request_->Set_StatusCode(HSCNotFound);
+        _Request_->Set_StatusCode(HSCInternalServerError);
         return false;
     }
     _Request_->Set_StatusCode(HSCOK);

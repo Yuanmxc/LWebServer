@@ -19,7 +19,6 @@ std::unique_ptr<Socket> Server::Server_Accept() {
 }
 
 void Server::Server_Accept(fun&& f) {
-    // 套接字被设置成非阻塞，需要一个while循环来接收
     while (1) {
         int ret = 0;
         ret = ::accept4(fd(), nullptr, nullptr,

@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <netinet/in.h>
-#include <string.h>
 #include <sys/socket.h>
 
 #include <algorithm>
@@ -114,6 +113,7 @@ void FastCgi::CreateContentValue(const std::string& name,
 
 void FastCgi::SendContent(const std::string& tag, const std::string& value) {
     unsigned char bodyBuffer[CONTENT_BUFFER_LEN];
+    memset(bodyBuffer, 0, sizeof bodyBuffer);
 
     int ContentLength = 0;
     CreateContentValue(tag, tag.size(), value, value.size(), bodyBuffer,
@@ -196,7 +196,6 @@ std::string FastCgi::ReadContent() {
 
             ret = read(socket_.fd(), &endRequest, sizeof endRequest);
             assert(ret == sizeof(endRequest));
-            std::cout << "内容接收至结尾.\n";
         }
     }
     return Content;
@@ -221,6 +220,7 @@ char* FastCgi::FindStart(char* data) {
     }
     return NULL;
 }
+
 void  // 传入要请求的路径与输入
 FastCgi::start(const std::string& path, const std::string& data) {
     ++requestId_;
@@ -248,4 +248,5 @@ FastCgi::start(const std::string& path, const std::string& data) {
     // 结束发送 发送
     SendRequest(data.c_str(), data.size());
 }
+
 }  // namespace ws

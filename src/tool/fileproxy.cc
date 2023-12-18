@@ -22,7 +22,7 @@ __off_t FileProxy::FileSize() {
 bool FileProxy::IsTextFile() {
     Statget();
     return (stat_->st_mode & S_IFDIR || stat_->st_mode & S_IFCHR ||
-            stat_->st_mode & S_IFBLK);
+            stat_->st_mode & S_IFBLK || stat_->st_mode & S_IFIFO);
 }
 
 FileProxy::~FileProxy() { ::close(File_Description); }

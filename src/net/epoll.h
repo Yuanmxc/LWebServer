@@ -10,7 +10,7 @@
 #include "epoll_event_result.h"
 
 namespace ws {
-class Epoll final : public Nocopy, Havefd {
+class Epoll final : public Nocopy, public Havefd {
    public:
     Epoll() : epoll_fd_(epoll_create1(::EPOLL_CLOEXEC)) {}
 

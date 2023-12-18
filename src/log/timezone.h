@@ -1,7 +1,8 @@
 #ifndef TIMEZONE_H_
 #define TIMEZONE_H_
 
-#include <ctime>
+#include <time.h>
+
 #include <memory>
 
 #include "../base/copyable.h"
@@ -22,7 +23,9 @@ class TimeZone : public Copyable {
     time_t fromLocalTime(const struct tm&) const;
 
     static struct tm toUtcTime(time_t secondsSinceEpoch, bool yday = false);
+
     static time_t fromUtcTime(const struct tm&);
+
     static time_t fromUtcTime(int year, int month, int day, int hour,
                               int minute, int seconds);
 

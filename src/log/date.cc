@@ -9,7 +9,7 @@ namespace ws {
 char require_32_bit_integer_at_least[sizeof(int) >= sizeof(int32_t) ? 1 : -1];
 
 constexpr int getJulianDayNumber(int year, int month, int day) {
-    (void)require_32_bit_integer_at_least;
+    (void)require_32_bit_integer_at_least;  // no warning please
     int a = (14 - month) / 12;
     int y = year + 4800 - a;
     int m = month + 12 * a - 3;
