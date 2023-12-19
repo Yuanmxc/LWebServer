@@ -71,6 +71,7 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
         }
     }
     std::string str(strart, ptr->Readable());
+    std::cout << "一次recv的完成 socket.cc : " << sum << std::endl;
     return static_cast<int>(sum);
 }
 
