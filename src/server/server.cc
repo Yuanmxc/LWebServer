@@ -26,6 +26,7 @@ void Server::Server_Accept(fun&& f) {
         if (ret != -1) {
             // 成功以后才会分发套接字；失败直接退出就可以了；
             f(ret);
+            break;
         } else if (ret == -1 && errno == EMFILE) {
             // 只有一个线程accept，所以此做法可以保证安全；
             fileopen_helper prevent(FileOpen);
@@ -33,12 +34,11 @@ void Server::Server_Accept(fun&& f) {
             ret = ::accept4(fd(), nullptr, nullptr, SOCK_NONBLOCK);
             ::close(fd());
             break;
-        } else if (ret == -1 && errno == EWOULDBLOCK) {  // EWOULDBLOCK
+        } else if (ret == -1 && (errno == EWOULDBLOCK || errno == EAGAIN)) {
             continue;
-        } else if (
-            ret ==
-            -1) {  // ECONNABORTED
-                   // 在等待队列的时候被关闭了，不是非阻塞套及字的话会一直阻塞;
+        } else if (ret == -1) {
+            // ECONNABORTED
+            // 在等待队列的时候被关闭了，不是非阻塞套及字的话会一直阻塞;
             break;
         } else {
             std::cerr

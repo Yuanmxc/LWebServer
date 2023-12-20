@@ -5,10 +5,7 @@
 #include "httpstatus.h"
 
 namespace ws {
-void HttpParser::Again_Parser() {
-    Parser_Result.release();
-    Parser_Result = std::make_unique<HttpParser_Content>();
-}
+void HttpParser::Again_Parser() { Parser_Result->init(); }
 
 bool HttpParser::SetRequesting() {
     Request_Result->Set_VMajor(Parser_Result->V_major);

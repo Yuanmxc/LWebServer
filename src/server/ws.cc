@@ -40,6 +40,9 @@ void Web_Server::Running() {
 
         while (true) {
             _Epoll_.Epoll_Wait(Event_Reault);
+            // 在性能分析的时候需要用到信号，而在接收到信号的时候epoll_wait会被中断返回-1，errno==EINTR；
+            if (Event_Reault.size() == -1)
+                continue;  // 防止跑性能分析就会出现段错误；
             for (int i = 0; i < Event_Reault.size(); ++i) {
                 auto& item = Event_Reault[i];
                 int id = item.Return_fd();

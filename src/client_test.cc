@@ -1,10 +1,12 @@
 #include "../client/client.h"
-#include <thread>
-#include <string>
-#include <unistd.h>
-#include <iostream>
 
-ws::Client client_; 
+#include <unistd.h>
+
+#include <iostream>
+#include <string>
+#include <thread>
+
+ws::Client client_;
 
 const char Content[] = R"(********GET config.dot HTTP/1.1
 Host: /home/Yuanmxc/repository/MxcServer
@@ -30,11 +32,11 @@ Connection: Keep-Alive
 
 */
 
-int main(){
-    //client_.Connect();
-    //sleep(1);
-    client_.Start(); // 开启事件循环
-    client_.Connect(); // Connect与SendToServer的第一次执行要有一个同步关系
+int main() {
+    // client_.Connect();
+    // sleep(1);
+    client_.Start();  // 开启事件循环
+    client_.Connect();  // Connect与SendToServer的第一次执行要有一个同步关系
     sleep(1);
     client_.SendToServer(Content);
     return 0;

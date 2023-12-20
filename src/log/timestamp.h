@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <boost/operators.hpp>
+#include <cinttypes>
 #include <string>
 
 #include "../base/copyable.h"

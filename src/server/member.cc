@@ -45,8 +45,11 @@ void Member::Init() {
 }
 
 bool Member::CloseAble() const& {
-    if (Http_Request_->Return_Flag() != Keep_Alive && Http_Parser_->Finished())
-        return true;
+    if (Http_Parser_->Finished() &&
+        ((Http_Request_->Return_Version_Ma() == 1 &&
+          Http_Request_->Return_Version_Mi() == 0) ||
+         Http_Request_->Return_Flag() != Keep_Alive))
+        return true;  // http1.0不支持短连接
     return false;
 }
 }  // namespace ws
