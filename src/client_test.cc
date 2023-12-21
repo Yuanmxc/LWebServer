@@ -16,7 +16,7 @@ Connection: Close
 )";
 
 /*
-GET / HTTP/1.1
+GET / HTTP/1.0
 Host: 127.0.0.1:8888
 User-Agent: ApacheBench/2.3
 Accept: ---
