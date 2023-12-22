@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
-project(Web_Server) #引入两个变量
+project(Web_Server)
 
 set(CMAKE_CXX_STANDARD 14)
 link_libraries(-pthread -lboost_system -lboost_thread)
 link_libraries(-lprofiler) # 用于性能测试
-SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -g -fno-strict-aliasing -O2 -Wall -Wextra -pipe -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-deprecated -m64 -Wnonnull)
-
+SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -g -fno-strict-aliasing -O2 -Wall -Wextra -pipe -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-deprecated -m64 -Wnonnull -Wstringop-overflow -Wuninitialized -Wunused)
 aux_source_directory(src/base WS_BASE)
 aux_source_directory(src/server WS_SERVER)
 aux_source_directory(src/http/provider WS_PROVIDER)

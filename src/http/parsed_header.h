@@ -21,7 +21,7 @@ class ParsedHeader : public Copyable, public BaseBuffer {
     ParsedHeader() = default;
     size_t Readable() const override { return length; }
     const char* ReadPtr() const override { return Header; }
-    void Read(char* Start, int bytes) {
+    void __attribute__((access(write_only, 1))) Read(char* Start, int bytes) {
         memcpy(Start, Header, static_cast<size_t>(bytes));
     }
 
@@ -29,7 +29,9 @@ class ParsedHeader : public Copyable, public BaseBuffer {
         return nullptr;
     }
     size_t Writeable() const { return length; }
-    virtual char* WritePtr() { return const_cast<char*>(Header); }
+    virtual __attribute__((returns_nonnull)) char* WritePtr() {
+        return const_cast<char*>(Header);
+    }
 
     size_t Length() const { return length; }
     char Peek(int jump) const {

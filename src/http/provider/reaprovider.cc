@@ -66,8 +66,7 @@ bool REAProvider::FileProvider(std::shared_ptr<FileReader>& file) {
 
     if (y.Readable() == 1 &&
         release_ptr2[0] == '/') {  // 默认情况打开index.html
-        file = std::make_shared<FileReader>(
-            "/home/Yuanmxc/repository/MxcServer/src/index.html");
+        file = std::make_shared<FileReader>("../src/index.html");
     } else {
         file = std::make_shared<FileReader>(
             static_cast<FileProxy>(str.c_str())  // 构造函数中已经open了

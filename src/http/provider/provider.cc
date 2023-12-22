@@ -4,8 +4,16 @@
 #include "../../http/httpstatus.h"
 #include "mime.cc"
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
+// 这个文件中的函数大多数在每次请求中只会调用一次，所以用不上hot
+
 namespace ws {
-bool constexpr Provider::IsFilename(char x) {
+bool constexpr __attribute__((pure)) Provider::IsFilename(char x) {
     return !(x == '?' || x == '\\' || x == '/' || x == '*' || x == '\"' ||
              x == '\'' || x == '<' || x == '>' || x == '|');
 }
@@ -21,12 +29,12 @@ int Provider::WriteHead(int ma, int mi, const HttpStatusCode& code) {
 
 int Provider::WriteDate() {
     time_t t = time(nullptr);
-    char buf[100];
+    char buf[70];
     strftime(buf, 70, "Date: %a, %d %b %Y %H: %M:%S GMT\r\n", gmtime(&t));
     return _Write_Loop_->swrite(buf);
 }
 
-int Provider::WriteItem(const char* key, const char* va) {
+int __attribute__((hot)) Provider::WriteItem(const char* key, const char* va) {
     return _Write_Loop_->swrite(key, va);
 }
 
@@ -72,7 +80,7 @@ int Provider::RegularProvide(long Content_Length) {
     return RegularProvide(Content_Length, AutoAdapt().c_str());
 }
 
-FastFindMIMEMatcher FindMIME;
+static FastFindMIMEMatcher FindMIME;
 
 std::string Provider::MIME(const char* type, ptrdiff_t len) const {
     auto res = FindMIME.get(std::string(type, len));

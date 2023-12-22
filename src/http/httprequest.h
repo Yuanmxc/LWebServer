@@ -8,6 +8,12 @@
 #include "httpstatus.h"
 #include "parsed_header.h"
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
 
 class HttpRequest : public Nocopy {
@@ -30,23 +36,25 @@ class HttpRequest : public Nocopy {
         Request_Buffer_ = std::move(ub);
     }
 
-    int Return_Version_Ma() { return Version_Major; }
-    int Return_Version_Mi() { return Version_Minor; }
-    const char* Return_Content_Start() { return Content_Start; }
-    size_t Return_Content_length() { return Content_Length; }
+    int Return_Version_Ma() const& noexcept { return Version_Major; }
+    int Return_Version_Mi() const& noexcept { return Version_Minor; }
+    const char* Return_Content_Start() const& noexcept { return Content_Start; }
+    size_t Return_Content_length() const& noexcept { return Content_Length; }
 
-    HttpStatusCode Return_Statuscode() const { return StatusCode_; }
-    HttpRequestMethod Return_Method() const { return Method_; }
-    HttpFlag Return_Flag() const { return Flag_; }
-    HttpParserFault Return_Fault() const { return Fault_; }
+    HttpStatusCode Return_Statuscode() const noexcept { return StatusCode_; }
+    HttpRequestMethod Return_Method() const noexcept { return Method_; }
+    HttpFlag Return_Flag() const noexcept { return Flag_; }
+    HttpParserFault Return_Fault() const noexcept { return Fault_; }
 
-    ParsedHeader& Return_Uri() { return Uri_; }
+    ParsedHeader& Return_Uri() noexcept { return Uri_; }
     std::shared_ptr<UserBuffer> Return_RBuffer() { return Request_Buffer_; }
 
     void Store_Header(const ParsedHeader&, const ParsedHeader&);
     ParsedHeader Get_Value(const ParsedHeader&) const;
 
-    bool Request_good() const { return Fault_ == HPFContent; }
+    bool __attribute__((pure)) Request_good() const noexcept {
+        return Fault_ == HPFContent;
+    }
 
    private:
     int Version_Major;

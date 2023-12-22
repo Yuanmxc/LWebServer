@@ -2,9 +2,16 @@
 
 #include <cstring>
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
 // 向Start这个缓冲区中写入bytes个字节，并把read_slot向后移动
-void UserBuffer::Read(char* Start, int bytes) {
+void __attribute__((access(write_only, 1)))
+UserBuffer::Read(char* Start, int bytes) {
     if (Read_Spot + bytes > Write_Spot) {
         throw std::out_of_range(
             "'UserBuffer::Read' Out ou range when reading.");
@@ -32,7 +39,7 @@ char UserBuffer::Peek(int jump) const {
     return Buffer_[Read_Spot + jump];
 }
 // 返回成功写入的字节数
-int UserBuffer::Write(int bytes) {
+int __attribute__((hot)) UserBuffer::Write(int bytes) {
     if (bytes > Writeable()) {
         throw std::out_of_range(
             "'UserBuffer::Write' The parameter is not in the valid range");
@@ -42,7 +49,8 @@ int UserBuffer::Write(int bytes) {
     return bytes;
 }
 
-int UserBuffer::Write(char* Buf, int bytes) {
+int __attribute__((access(read_only, 1)))
+UserBuffer::Write(char* Buf, int bytes) {
     if (bytes > Writeable()) {
         Move_Buffer();
     }
@@ -55,7 +63,8 @@ int UserBuffer::Write(char* Buf, int bytes) {
     return bytes;
 }
 
-int UserBuffer::Write(const char* Buf, int bytes) {
+int __attribute__((access(read_only, 1)))
+UserBuffer::Write(const char* Buf, int bytes) {
     if (bytes > Writeable()) {
         Move_Buffer();
     }
@@ -82,12 +91,13 @@ int UserBuffer::Write(const std::string& str) {
     return static_cast<int>(len);
 }
 
-int UserBuffer::SWrite(const char* format, va_list para) {
+int __attribute__((access(read_only, 1)))
+UserBuffer::SWrite(const char* format, va_list para) {
     return vsnprintf(Buffer_.get() + Write_Spot,
                      static_cast<size_t>(Writeable()), format, para);
 }
 
-void UserBuffer::Move_Buffer() {
+void __attribute__((hot)) UserBuffer::Move_Buffer() {
     // 并不是每一次都会拷贝，在读指针大于缓存的一半的时候再拷贝；
     if (Read_Spot < Buffer_Size / 2) {
         return;

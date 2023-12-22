@@ -8,6 +8,12 @@
 #include "../base/copyable.h"
 #include "../base/havefd.h"
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
 enum EpollEventType {
     EETCOULDREAD = ::EPOLLIN,
@@ -48,7 +54,8 @@ class EpollEvent final : public Copyable {
         : event_(epoll_event{EET, {.fd = Hf.fd()}}) {
     }  // 这样可以被Havefd的派生类构造 其中包含fd 可行
 
-    bool check(EpollEventType EET) const noexcept {
+    bool __attribute__((hot)) __attribute__((pure))
+    check(EpollEventType EET) const noexcept {
         return event_.events & EET;
     }
     bool check(std::initializer_list<EpollEventType> EET) const noexcept {
@@ -59,7 +66,9 @@ class EpollEvent final : public Copyable {
     }
 
     epoll_event* Return_Pointer() noexcept { return &event_; }
-    int Return_fd() const noexcept { return event_.data.fd; }
+    int __attribute__((hot)) Return_fd() const noexcept {
+        return event_.data.fd;
+    }
     uint32_t Return_EET() const noexcept { return event_.events; }
 
    private:

@@ -3,6 +3,12 @@
 
 #include <memory>
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 #include "../base/nocopy.h"
 #include "../net/socket.h"
 #include "../tool/userbuffer.h"
@@ -20,9 +26,11 @@ class HttpParser : public Nocopy {
           Request_Result(request),
           Extrabuffer_(extra) {}
 
-    void Again_Parser();
-    HttpParserFault Starting_Parser();
-    bool Finished() const { return Parser_Result->Fault == HPFContent; }
+    void __attribute__((hot)) Again_Parser();
+    HttpParserFault __attribute__((hot)) Starting_Parser();
+    bool __attribute__((hot)) Finished() const {
+        return Parser_Result->Fault == HPFContent;
+    }
 
     bool SetRequesting();
 
@@ -32,7 +40,9 @@ class HttpParser : public Nocopy {
     std::shared_ptr<HttpRequest> Request_Result;
     Extrabuf& Extrabuffer_;
     bool Parsering();
-    bool Parser_able() { return User_Buffer_->Readable() >= 16; }
+    bool Parser_able() __attribute__((pure)) {
+        return User_Buffer_->Readable() >= 16;
+    }  // 请求行+空行，最小的HTTP方法为三字节
 };
 
 }  // namespace ws

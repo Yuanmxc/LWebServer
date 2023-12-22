@@ -4,8 +4,14 @@
 
 #include <cstdarg>
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
-int WriteLoop::swrite(const char* format, ...) {
+int __attribute__((hot)) WriteLoop::swrite(const char* format, ...) {
     va_list va;
     va_start(va, format);
     int ret = User_Buffer_->SWrite(format, va);
@@ -14,7 +20,7 @@ int WriteLoop::swrite(const char* format, ...) {
     return ret;
 }
 
-WriteLoop::COMPLETETYPE WriteLoop::Send(int length) {
+WriteLoop::COMPLETETYPE __attribute__((hot)) WriteLoop::Send(int length) {
     if (length < 1)
         throw std::invalid_argument("'WriteLoop::Send' error parameter.");
     int sent_ = 0;
@@ -42,7 +48,8 @@ WriteLoop::COMPLETETYPE WriteLoop::Send(int length) {
     return COMPLETE;
 }
 
-WriteLoop::COMPLETETYPE WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
+WriteLoop::COMPLETETYPE __attribute__((hot))
+WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
     ssize_t len = 0;
     while (len = ptr->SendFile(fd_) && len > 0) {
     }

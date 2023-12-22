@@ -6,6 +6,12 @@
 
 #include "../net/epoll_event.h"
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
 int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType& EE) {
     int id = ptr->fd();  // RTTI
@@ -35,7 +41,7 @@ int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType&& EE) {
     return id;
 }
 
-int Manger::Remove(int fd) {
+int __attribute__((hot)) Manger::Remove(int fd) {
     if (!Exist(fd)) {
         throw std::invalid_argument("'Manger::Remove' Don't have this fd.");
     }
@@ -43,7 +49,7 @@ int Manger::Remove(int fd) {
     return Fd_To_Member.erase(fd);
 }
 
-int Manger::Update(int fd) {
+int __attribute__((hot)) Manger::Update(int fd) {
     if (!Exist(fd)) {
         throw std::invalid_argument("'Manger::Update' Don't have this fd.");
     }
@@ -57,7 +63,7 @@ int Manger::UpdateWrite(int fd) {
     return _Epoll_.Modify(*Fd_To_Member[fd], EpollCanWite());
 }
 
-int Manger::JudgeToClose(int fd) {  // 函数没有返回值
+int __attribute__((hot)) Manger::JudgeToClose(int fd) {  // 函数没有返回值
     if (!Exist(fd)) {
         throw std::invalid_argument(
             "'Manger::JudgeToClose' Don't have this fd.");
