@@ -56,6 +56,12 @@ class HttpRequest : public Nocopy {
         return Fault_ == HPFContent;
     }
 
+    void clear() {
+        Request_Buffer_->Clean();
+        Header_Value.clear();
+        Header_Value.reserve(10);
+    }
+
    private:
     int Version_Major;
     int Version_Minor;

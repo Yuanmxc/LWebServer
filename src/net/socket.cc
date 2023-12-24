@@ -7,6 +7,7 @@
 #include <iostream>
 
 namespace ws {
+// 提供给上层单次关闭的功能
 int Socket::Close() {
     int rv = ::close(Socket_fd_);
     if (rv != -1) Have_Close_ = false;
@@ -27,9 +28,9 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
     ssize_t sum = 0;
     ssize_t ret = 0;
 
-    // char* strart = ptr->WritePtr();
-
     char* StartBuffer = ptr->WritePtr();
+    errno = 0;
+
     while (true) {
         ret = recv(Socket_fd_, StartBuffer, static_cast<size_t>(length), flag);
 
@@ -65,7 +66,8 @@ int Socket::Read(std::shared_ptr<UserBuffer> ptr, int length, int flag) {
             else if (errno == EINTR)
                 continue;
             else {
-                std::cerr << "ERROR : Socket::Read.\n";
+                std::cerr << "ERROR : Socket::Read --> (errno == " << errno
+                          << " )\n";
                 break;
             }
         }

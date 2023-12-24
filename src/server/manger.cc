@@ -20,11 +20,15 @@ int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType& EE) {
     return id;
 }
 
-int Manger::Opera_Member(std::unique_ptr<Member>&& ptr, EpollEventType&& EE) {
-    int id = ptr->fd();
-    Fd_To_Member.emplace(id, std::move(ptr.release()));
-    _Epoll_.Add(*Fd_To_Member[id], std::move(EE));
-    return id;
+int Manger::Opera_Member(int fd, EpollEventType&& EE) {
+    if (!Exist(fd)) {
+        Fd_To_Member.emplace(fd, new Member(fd));
+    } else {
+        Fd_To_Member[fd]->clear();
+    }
+
+    _Epoll_.Add(*Fd_To_Member[fd], std::move(EE));
+    return fd;
 }
 
 int Manger::Opera_Member(std::unique_ptr<Member>&& ptr, EpollEventType& EE) {
@@ -46,7 +50,7 @@ int __attribute__((hot)) Manger::Remove(int fd) {
         throw std::invalid_argument("'Manger::Remove' Don't have this fd.");
     }
     _Epoll_.Remove(*Fd_To_Member[fd], EpollTypeBase());
-    return Fd_To_Member.erase(fd);
+    return Fd_To_Member[fd]->InitiativeClose();
 }
 
 int __attribute__((hot)) Manger::Update(int fd) {
@@ -76,14 +80,15 @@ int __attribute__((hot)) Manger::JudgeToClose(int fd) {  // 函数没有返回�
     } else if (OneMember->CloseAble()) {
         _Epoll_.Remove(static_cast<EpollEvent>(fd));
         auto temp = Fd_To_Member.find(fd);
-        Fd_To_Member.erase(fd);
+
+        Fd_To_Member[fd]->InitiativeClose();  // 关闭套接字
     } else {  // 解析失败，包没收全；或者包收全，状态为keep-alive
         Update(fd);
     }
     return 0;
 }
 
-void Manger::Reading(int fd, long _time_) {
+void __attribute__((hot)) Manger::Reading(int fd, long _time_) {
     if (!Exist(fd)) {
         throw std::invalid_argument("'Manger::Reading' Don't have this fd.");
     }

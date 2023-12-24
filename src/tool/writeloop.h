@@ -48,6 +48,16 @@ class WriteLoop : public Nocopy, public Havefd {
     COMPLETETYPE DoFirst();
     COMPLETETYPE DoAll();
 
+    [[deprecated]] size_t TaskQueSize() const& noexcept {
+        return Que.size();
+    }  // For Debugging.
+
+    // 复用member对象套接字会变，但是fd不变
+    void clear() {
+        Que.clear();
+        User_Buffer_->Clean();
+    }
+
    private:
     std::unique_ptr<UserBuffer> User_Buffer_;
     std::deque<Task> Que;  // 支持长连接

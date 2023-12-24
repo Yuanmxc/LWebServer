@@ -66,7 +66,7 @@ class EpollEvent final : public Copyable {
     }
 
     epoll_event* Return_Pointer() noexcept { return &event_; }
-    int __attribute__((hot)) Return_fd() const noexcept {
+    int __attribute__((hot)) Return_fd() const& noexcept {
         return event_.data.fd;
     }
     uint32_t Return_EET() const noexcept { return event_.events; }

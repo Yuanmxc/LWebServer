@@ -4,6 +4,12 @@
 
 #include "../tool/userbuffer.h"
 
+#ifndef __GNUC__
+
+#define __attribute__(x) /*NOTHING*/
+
+#endif
+
 namespace ws {
 void Member::DoRead() {
     // step1: 从套接字中把数据读到Member的User_Buffer和Socket的Extrabuf中；
@@ -44,7 +50,17 @@ void Member::Init() {
         std::make_unique<ContentProvider>(Http_Request_, Write_Loop_);
 }
 
-bool Member::CloseAble() const& {
+void Member::clear() {
+    WriteComplete = false;
+    User_Buffer->Clean();
+    Socket_Ptr->clear();
+    Http_Request_->clear();
+    Http_Parser_->clear();
+    Write_Loop_->clear();
+    // Content_Provider_是一个松耦合的功能类，在更新了Write_Loop_和Http_Request_以后不需要更新
+}
+
+bool __attribute__((pure)) Member::CloseAble() const& {
     if (Http_Parser_->Finished() &&
         ((Http_Request_->Return_Version_Ma() == 1 &&
           Http_Request_->Return_Version_Mi() == 0) ||

@@ -5,6 +5,8 @@
 
 #include "server/ws.h"
 
+#undef __GNUC__
+
 // 用于服务端程序执行性能测试
 void setGperfStatus(int signum) {
     static bool is_open = false;
@@ -24,7 +26,8 @@ void setGperfStatus(int signum) {
 
 int main(int argc, char **argv) {
     signal(SIGUSR1, setGperfStatus);
-    std::cout << "pid = " << getpid() << std::endl;
+    std::cout << "pid = " << getpid()
+              << std::endl;  // 通过发送请求来开始和终止性能测试
     ws::Web_Server().Running();
     return 0;
 }
