@@ -2,10 +2,10 @@
 #define WS_H_
 
 #include "../net/epoll.h"
+#include "../tool/timer.h"
 #include "channel.h"
 #include "manger.h"
 #include "server.h"
-
 namespace ws {
 class Web_Server {
    public:
@@ -16,6 +16,7 @@ class Web_Server {
     Manger _Manger_;
     Epoll _Epoll_;
     Server _Server_;
+    Timer _Timer_;
 };
 }  // namespace ws
 

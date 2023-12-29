@@ -41,6 +41,9 @@ constexpr EpollEventType EpollRW() {
     return static_cast<EpollEventType>(EpollTypeBase() | EETCOULDWRITE |
                                        EETCOULDREAD);
 }
+constexpr EpollEventType EpollOnlyRead() {
+    return static_cast<EpollEventType>(EETCOULDREAD);
+}
 
 class EpollEvent final : public Copyable {
    public:

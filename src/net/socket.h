@@ -91,7 +91,7 @@ class Extrabuf : public Nocopy {
     int BufferSize = 4048;  // 额外buffer大小
 };
 
-class Socket : public Havefd, Copyable {
+class Socket : public Havefd, public Copyable {
    public:
     Socket()
         : Socket_fd_(

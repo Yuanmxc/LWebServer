@@ -1,5 +1,5 @@
 digraph config{
-    WS -> {channel_helper, Server,Manger,Epoll}
+    WS -> {channel_helper, Server,Manger,Epoll, Timer, LoadBalance}
     channel_helper -> {channel, channel, channel}
     channel -> {Manger,Epoll}
     Epoll -> {EpollEvent_Result}

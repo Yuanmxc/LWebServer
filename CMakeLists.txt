@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 link_libraries(-pthread -lboost_system -lboost_thread)
 link_libraries(-lprofiler) # 用于性能测试
 link_libraries(-ltcmalloc) # 用于tcmalloc
+aux_source_directory(tool/ThreadSafeQueue WS_QUEUE)
 
 SET(CMAKE_C_FLAGS ${CMAKE_CXX_FLAGS} -g -fno-strict-aliasing -O2 -Wall -Wextra -pipe
 -D_GNU_SOURCE -D_REENTRANT -fPIC -Wno-deprecated -m64 -Wnonnull -Wstringop-overflow -Wuninitialized -Wunused)
@@ -29,4 +30,5 @@ add_executable(Web_Server
         ${WS_TOOL}
         ${WS_FASTCGI}
         ${WS_LOG}
+        ${WS_QUEUE}
 )
