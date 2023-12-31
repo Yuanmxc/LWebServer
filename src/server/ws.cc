@@ -10,8 +10,9 @@
 
 #include "../base/config.h"
 #include "../tool/ThreadSafeQueue/lockfreequeue.h"
+#include "../tool/loadbalance.h"
 namespace ws {
-
+extern template class LockFreeQueue<ThreadLoadData>;
 int64_t Get_Current_Time() {
     timeval now;
     int ret = gettimeofday(&now, nullptr);
@@ -36,9 +37,14 @@ void Web_Server::Running() {
         // 处理连接，又是单线程，只注册一个可读事件即可
         _Epoll_.Add(_Timer_, EpollOnlyRead());
         _Timer_.SetTimer();
+
+        LockFreeQueue<ThreadLoadData> que;
+        LoadBalance LB(que);  // 负载均衡器
+
         EpollEvent_Result Event_Reault(Yuanmxc_Arch::EventResult_Number());
 
-        channel_helper Channel_;
+        channel_helper Channel_(LB);
+        ;
         Channel_.loop();
 
         while (true) {
@@ -63,6 +69,7 @@ void Web_Server::Running() {
                     if (size != sizeof(uint64_t)) {
                         std::cerr << "ERROR : read error. (ws.cc)\n";
                     }
+                    LB.ExtractDataDromLockFreeQueue();
                 }
             }
         }

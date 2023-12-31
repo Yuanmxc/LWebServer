@@ -4,6 +4,8 @@
 #include <sys/sysinfo.h>
 #include <sys/types.h>
 
+#include "../tool/ThreadSafeQueue/lockfreequeue.h"
+#include "../tool/loadbalance.h"
 #include "member.h"
 namespace ws {
 
@@ -21,7 +23,8 @@ bool SetCPUaffinity(int param) {
     }
 }
 
-void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index) {
+void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index,
+             LockFreeQueue<ThreadLoadData>& lfque) {
     channel rea(eventfd);
     pro.set_value(rea.return_ptr());
     rea._Epoll_.Add(rea, EpollCanRead());
@@ -43,8 +46,15 @@ void looping(std::promise<std::queue<int>*>& pro, int eventfd, int index) {
                         while (Temp--) {
                             assert(!rea.return_ptr()->empty());
                             // 从队列中取到的值就是fd，第二个参数是这个fd加入epoll应该触发的事件是什么，默认注册三个事件，加上读事件；
-                            rea._Manger_.Opera_Member(rea.return_ptr()->front(),
-                                                      EpollCanRead());
+                            rea._Manger_.Opera_Member(
+                                rea.return_ptr()->front(), EpollCanRead(),
+                                [&lfque, index](uint32_t throught) {
+                                    // 这里捕获了index和lfque
+                                    ThreadLoadData temp(throught, index);
+                                    // printf("queue -> %p, throught %d\n",
+                                    // &lfque, temp.Throughput);
+                                    lfque.push(temp);
+                                });
                             rea.return_ptr()->pop();
                         }
                         rea._Epoll_.Modify(rea, EpollCanRead());
@@ -76,8 +86,9 @@ void channel_helper::loop() {
         std::promise<std::queue<int>*> Temp;
         vec.push_back(Temp.get_future());
         int fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
-        pool.push_back(
-            std::thread(looping, std::ref(Temp), fd, i % ThreadNumber));
+        pool.push_back(std::thread(looping, std::ref(Temp), fd,
+                                   i % ThreadNumber,
+                                   std::ref(TrueLD.ReturnQue())));
         pool.back().detach();
         store_.push_back(vec[i].get());
         eventfd_.push_back(fd);
@@ -86,9 +97,17 @@ void channel_helper::loop() {
 
 // 每到达一个连接就会使用eventfd通信一次
 void channel_helper::Distribution(int fd) {
-    store_[RoundRobin]->push(fd);
-    write(eventfd_[RoundRobin], &channel_helper::tool, sizeof(tool));
-    RoundRobin = (RoundRobin + 1) % RealThreadNumber;
+    auto index = RoundRobin();
+    store_[index]->push(fd);
+    write(eventfd_[index], &channel_helper::tool, sizeof(tool));
 }
+
+int channel_helper::RoundRobin() & noexcept {
+    auto temp = RoundRobinValue;
+    RoundRobinValue = (RoundRobinValue + 1) % RealThreadNumber;
+    return temp;
+}
+
+int channel_helper::WeightedRoundRobin() & { return TrueLD.Distribution(); }
 
 }  // namespace ws

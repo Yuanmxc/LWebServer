@@ -29,6 +29,8 @@ WriteLoop::COMPLETETYPE __attribute__((hot)) WriteLoop::Send(int length) {
                   (ans = static_cast<int>(send(fd_, User_Buffer_->ReadPtr(),
                                                length - sent_, 0))) > 0;) {
         sent_ += ans;
+        throughout += sent_;
+        ++interval;
     }
     // 一个http响应报文至少需要两次send，所以缓冲区需要记录长度；
     User_Buffer_->read(sent_);
@@ -51,7 +53,9 @@ WriteLoop::COMPLETETYPE __attribute__((hot)) WriteLoop::Send(int length) {
 WriteLoop::COMPLETETYPE __attribute__((hot))
 WriteLoop::SendFile(std::shared_ptr<FileReader> ptr) {
     ssize_t len = 0;
+    ++interval;
     while (len = ptr->SendFile(fd_) && len > 0) {
+        throughout += len;
     }
     if (!ptr->Send_End()) {
         InsertSendFile(ptr);
@@ -72,6 +76,11 @@ WriteLoop::COMPLETETYPE WriteLoop::DoFirst() {
 WriteLoop::COMPLETETYPE WriteLoop::DoAll() {
     while (1) {
         auto CompleteType = DoFirst();
+        if (interval >= expectedInetrval) {
+            WriteLoopCallback(throughout);
+            throughout = 0;
+            interval = 0;
+        }
         if (CompleteType == COMPLETE)
             continue;
         else

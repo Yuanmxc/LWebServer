@@ -20,9 +20,10 @@ int Manger::Opera_Member(std::unique_ptr<Member>& ptr, EpollEventType& EE) {
     return id;
 }
 
-int Manger::Opera_Member(int fd, EpollEventType&& EE) {
+int Manger::Opera_Member(int fd, EpollEventType&& EE,
+                         std::function<void(int)> fun) {
     if (!Exist(fd)) {
-        Fd_To_Member.emplace(fd, new Member(fd));
+        Fd_To_Member.emplace(fd, new Member(fd, fun));
     } else {
         Fd_To_Member[fd]->clear();
     }
