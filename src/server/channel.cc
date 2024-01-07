@@ -97,7 +97,7 @@ void channel_helper::loop() {
 
 // 每到达一个连接就会使用eventfd通信一次
 void channel_helper::Distribution(int fd) {
-    auto index = RoundRobin();
+    auto index = WeightedRoundRobin();
     store_[index]->push(fd);
     write(eventfd_[index], &channel_helper::tool, sizeof(tool));
 }

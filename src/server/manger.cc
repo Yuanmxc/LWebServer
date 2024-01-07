@@ -2,6 +2,7 @@
 
 #include <sys/socket.h>
 
+#include <atomic>
 #include <functional>
 
 #include "../net/epoll_event.h"
@@ -9,6 +10,16 @@
 #ifndef __GNUC__
 
 #define __attribute__(x) /*NOTHING*/
+
+#endif
+#if __GNUC__ < \
+    4  // https://gcc.gnu.org/onlinedocs/gcc-4.1.1/gcc/Atomic-Builtins.html
+
+static inline void barrier(void) { __asm__ volatile("mfence" ::: "memory"); }
+
+#else
+
+static inline void barrier(void) { __sync_synchronize(); }
 
 #endif
 
@@ -25,6 +36,7 @@ int Manger::Opera_Member(int fd, EpollEventType&& EE,
     if (!Exist(fd)) {
         Fd_To_Member.emplace(fd, new Member(fd, fun));
     } else {
+        // 放到这里而不是close的时候是为了保证一个顺序关系，即clear一定在open之前，如果在close的时候调用clear，还得加上内存屏障;
         Fd_To_Member[fd]->clear();
     }
 
@@ -51,6 +63,8 @@ int __attribute__((hot)) Manger::Remove(int fd) {
         throw std::invalid_argument("'Manger::Remove' Don't have this fd.");
     }
     _Epoll_.Remove(*Fd_To_Member[fd], EpollTypeBase());
+    barrier();
+
     return Fd_To_Member[fd]->InitiativeClose();
 }
 
@@ -80,7 +94,7 @@ int __attribute__((hot)) Manger::JudgeToClose(int fd) {  // 函数没有返回�
         return 0;
     } else if (OneMember->CloseAble()) {
         _Epoll_.Remove(static_cast<EpollEvent>(fd));
-        auto temp = Fd_To_Member.find(fd);
+        barrier();
 
         Fd_To_Member[fd]->InitiativeClose();  // 关闭套接字
     } else {  // 解析失败，包没收全；或者包收全，状态为keep-alive

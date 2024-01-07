@@ -64,7 +64,8 @@ class WriteLoop : public Nocopy, public Havefd {
     std::unique_ptr<UserBuffer> User_Buffer_;
     std::deque<Task> Que;  // 支持长连接
     int fd_;
-    std::function<void(int)> WriteLoopCallback;
+    std::function<void(int)>
+        WriteLoopCallback;  // 当然目前唯一的作用就是负载均衡，调用间隔为interval，应该设置成可配置的；
     uint32_t throughout = 0;
     // 负载均衡发送间隔，即调用多少次Dofirst以后发送到全局队列中，主要为了减少队列长度，以3为间隔，因为一个http响应报文最少需要调用三次
     uint32_t interval;
