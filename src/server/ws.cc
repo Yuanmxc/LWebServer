@@ -33,6 +33,7 @@ void Web_Server::Running() {
         _Server_.Set_AddrRUseA();
         _Server_.Base_Setting();
         _Server_.Server_BindAndListen();
+        _Server_.Server_DeferAccept();
         _Epoll_.Add(_Server_, EpollOnlyRead());
         // 处理连接，又是单线程，只注册一个可读事件即可
         _Epoll_.Add(_Timer_, EpollOnlyRead());

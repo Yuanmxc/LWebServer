@@ -2,7 +2,11 @@
 #define HTTPSTATUS_H_
 
 #include <iostream>
+#ifndef __GNUC__
 
+#define __attribute__(x) /*NOTHING*/
+
+#endif
 namespace ws {
 
 enum HttpStatusCode {
@@ -106,7 +110,7 @@ struct HttpParser_Content {
     HttpFlag Set_Ka = Keep_Alive;
 
     void
-    init() noexcept {  // 用于在每次解析的时候重新初始化状态而不是重新设置上指针
+    init() noexcept {  // 用于在每次解析的时候重新初始化状态而不是重新设置指针
         method = HRInit;
         Status = HPSOK;
         Fault = HPFOK;
@@ -166,82 +170,85 @@ constexpr const char* StatusCode_to_String(int statuscode) {
     }
 }
 
-constexpr bool isheader(char c) { return isalnum(c) || c == '-' || c == '_'; }
-
-constexpr bool isuri(char c) {
-    bool isuri[] = {
-        /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
-        false, false, false, false, false, false, false, false,
-        /*8   bs     ht     nl     vt     np     cr     so     si     15*/
-        false, false, false, false, false, false, false, false,
-        /*16  dle    dc1    dc2    dc3    dc4    nak    syn    etb    23*/
-        false, false, false, false, false, false, false, false,
-        /*24  can    em     sub    esc    fs     gs     rs     us     31*/
-        false, false, false, false, false, false, false, false,
-        /*32  ' '    !      "      #     $     %     &     '          39*/
-        false, false, false, true, true, true, true, false,
-        /*40  (      )      *      +     ,     -     .     /          47*/
-        false, false, false, true, true, true, true, true,
-        /*48  0     1     2     3     4     5     6     7             55*/
-        true, true, true, true, true, true, true, true,
-        /*56  8     9     :     ;     <      =     >      ?           63*/
-        true, true, true, true, false, true, false, true,
-        /*64  @     A     B     C     D     E     F     G             71*/
-        true, true, true, true, true, true, true, true,
-        /*72  H     I     J     K     L     M     N     O             79*/
-        true, true, true, true, true, true, true, true,
-        /*80  P     Q     R     S     T     U     V     W             87*/
-        true, true, true, true, true, true, true, true,
-        /*88  X     Y     Z     [      \      ]      ^      _         95*/
-        true, true, true, false, false, false, false, true,
-        /*96  `      a     b     c     d     e     f     g           103*/
-        false, true, true, true, true, true, true, true,
-        /*104 h     i     j     k     l     m     n     o            113*/
-        true, true, true, true, true, true, true, true,
-        /*112 p     q     r     s     t     u     v     w            119*/
-        true, true, true, true, true, true, true, true,
-        /*120 x     y     z     {      |      }      ~      del      127*/
-        true, true, true, false, false, false, false, false};
-
-    return (c >= 0) ? isuri[c] : false;
+constexpr bool __attribute__((const)) isheader(char c) throw() {
+    return isalnum(c) || c == '-' || c == '_';
 }
 
-constexpr bool isvalue(char c) {
-    bool isvalue[] = {
-        /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
-        false, false, false, false, false, false, false, false,
-        /*8   bs     ht     nl     vt     np     cr     so     si     15*/
-        false, false, false, false, false, false, false, false,
-        /*16  dle    dc1    dc2    dc3    dc4    nak    syn    etb    23*/
-        false, false, false, false, false, false, false, false,
-        /*24  can    em     sub    esc    fs     gs     rs     us     31*/
-        false, false, false, false, false, false, false, false,
-        /*32  ' '    !      "      #     $     %     &     '          39*/
-        true, true, true, true, true, true, true, true,
-        /*40  (      )      *      +     ,     -     .     /          47*/
-        true, true, true, true, true, true, true, true,
-        /*48  0     1     2     3     4     5     6     7             55*/
-        true, true, true, true, true, true, true, true,
-        /*56  8     9     :     ;     <      =     >      ?           63*/
-        true, true, true, true, true, true, true, true,
-        /*64  @     A     B     C     D     E     F     G             71*/
-        true, true, true, true, true, true, true, true,
-        /*72  H     I     J     K     L     M     N     O             79*/
-        true, true, true, true, true, true, true, true,
-        /*80  P     Q     R     S     T     U     V     W             87*/
-        true, true, true, true, true, true, true, true,
-        /*88  X     Y     Z     [      \      ]      ^      _         95*/
-        true, true, true, true, true, true, true, true,
-        /*96  `      a     b     c     d     e     f     g           103*/
-        true, true, true, true, true, true, true, true,
-        /*104 h     i     j     k     l     m     n     o            113*/
-        true, true, true, true, true, true, true, true,
-        /*112 p     q     r     s     t     u     v     w            119*/
-        true, true, true, true, true, true, true, true,
-        /*120 x     y     z     {      |      }      ~      del      127*/
-        true, true, true, true, true, true, true, false};
+constexpr bool is_uri[] = {
+    /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
+    false, false, false, false, false, false, false, false,
+    /*8   bs     ht     nl     vt     np     cr     so     si     15*/
+    false, false, false, false, false, false, false, false,
+    /*16  dle    dc1    dc2    dc3    dc4    nak    syn    etb    23*/
+    false, false, false, false, false, false, false, false,
+    /*24  can    em     sub    esc    fs     gs     rs     us     31*/
+    false, false, false, false, false, false, false, false,
+    /*32  ' '    !      "      #     $     %     &     '          39*/
+    false, false, false, true, true, true, true, false,
+    /*40  (      )      *      +     ,     -     .     /          47*/
+    false, false, false, true, true, true, true, true,
+    /*48  0     1     2     3     4     5     6     7             55*/
+    true, true, true, true, true, true, true, true,
+    /*56  8     9     :     ;     <      =     >      ?           63*/
+    true, true, true, true, false, true, false, true,
+    /*64  @     A     B     C     D     E     F     G             71*/
+    true, true, true, true, true, true, true, true,
+    /*72  H     I     J     K     L     M     N     O             79*/
+    true, true, true, true, true, true, true, true,
+    /*80  P     Q     R     S     T     U     V     W             87*/
+    true, true, true, true, true, true, true, true,
+    /*88  X     Y     Z     [      \      ]      ^      _         95*/
+    true, true, true, false, false, false, false, true,
+    /*96  `      a     b     c     d     e     f     g           103*/
+    false, true, true, true, true, true, true, true,
+    /*104 h     i     j     k     l     m     n     o            113*/
+    true, true, true, true, true, true, true, true,
+    /*112 p     q     r     s     t     u     v     w            119*/
+    true, true, true, true, true, true, true, true,
+    /*120 x     y     z     {      |      }      ~      del      127*/
+    true, true, true, false, false, false, false, false};
 
-    return (c >= 0) ? isvalue[c] : false;
+constexpr bool inline __attribute__((const)) isuri(char c) throw() {
+    return (c >= 0) ? is_uri[c] : false;
+}
+
+constexpr bool is_value[] = {
+    /*0   nul    soh    stx    etx    eot    enq    ack    bel     7*/
+    false, false, false, false, false, false, false, false,
+    /*8   bs     ht     nl     vt     np     cr     so     si     15*/
+    false, false, false, false, false, false, false, false,
+    /*16  dle    dc1    dc2    dc3    dc4    nak    syn    etb    23*/
+    false, false, false, false, false, false, false, false,
+    /*24  can    em     sub    esc    fs     gs     rs     us     31*/
+    false, false, false, false, false, false, false, false,
+    /*32  ' '    !      "      #     $     %     &     '          39*/
+    true, true, true, true, true, true, true, true,
+    /*40  (      )      *      +     ,     -     .     /          47*/
+    true, true, true, true, true, true, true, true,
+    /*48  0     1     2     3     4     5     6     7             55*/
+    true, true, true, true, true, true, true, true,
+    /*56  8     9     :     ;     <      =     >      ?           63*/
+    true, true, true, true, true, true, true, true,
+    /*64  @     A     B     C     D     E     F     G             71*/
+    true, true, true, true, true, true, true, true,
+    /*72  H     I     J     K     L     M     N     O             79*/
+    true, true, true, true, true, true, true, true,
+    /*80  P     Q     R     S     T     U     V     W             87*/
+    true, true, true, true, true, true, true, true,
+    /*88  X     Y     Z     [      \      ]      ^      _         95*/
+    true, true, true, true, true, true, true, true,
+    /*96  `      a     b     c     d     e     f     g           103*/
+    true, true, true, true, true, true, true, true,
+    /*104 h     i     j     k     l     m     n     o            113*/
+    true, true, true, true, true, true, true, true,
+    /*112 p     q     r     s     t     u     v     w            119*/
+    true, true, true, true, true, true, true, true,
+    /*120 x     y     z     {      |      }      ~      del      127*/
+    true, true, true, true, true, true, true, false};
+
+constexpr bool inline __attribute__((hot)) __attribute__((const))
+__attribute__((always_inline)) isvalue(char c) throw() {
+    return (c >= 0) ? is_value[c] : false;
 }
 }  // namespace ws
 

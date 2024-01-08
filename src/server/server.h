@@ -25,6 +25,7 @@ class Server : public Socket {
     std::unique_ptr<Socket> Server_Accept();
     void Server_Accept(fun&& f);
     void Server_BindAndListen();
+    int Server_DeferAccept();
 
     int Set_AddrRUseA() {
         return Set_Socket(SO_REUSEADDR, SOL_SOCKET);
