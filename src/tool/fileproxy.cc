@@ -30,4 +30,8 @@ FileProxy::~FileProxy() { ::close(File_Description); }
 FileProxy::FileProxy(const FileProxy& path1, const char* path2)
     : File_Description(openat(path1.fd(), path2, O_RDONLY)) {}
 
+void FileProxy::DoFadvise(int advice) {
+    // 从文件的起始开始读，直到文件的末尾
+    posix_fadvise(fd(), 0, 0, advice);
+}
 }  // namespace ws

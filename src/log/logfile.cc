@@ -66,6 +66,8 @@ std::string logfile::getlogfileName(const std::string &basename, time_t *now) {
     strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.",
              &tm);  // 格式化一个时间字符串
     filename += timebuf;
+    constexpr char hostname[] = {"Yuanmxc"};
+    filename += hostname;
 
     char pidbuf[32] = {0};
 

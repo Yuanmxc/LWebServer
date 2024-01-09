@@ -143,6 +143,7 @@ logging& loggingFactory<LEVEL>::getStream(
     typename ws::detail::logging::Loglevel level) {
     std::call_once(resourse_flag, &loggingFactory::initResourse, this, file,
                    line, level);
+
     logstream& Stream = LogData->stream();
     LogData->wrapper_.time_.swap(Timestamp::now());
     LogData->wrapper_.formatTime();

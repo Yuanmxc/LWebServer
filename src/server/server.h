@@ -46,8 +46,9 @@ class Server : public Socket {
     }  // 禁止延迟确认机制，减少时延
     int Base_Setting() {
         return Set_Socket(TCP_NODELAY | TCP_QUICKACK, SOL_TCP);
-    }                  // 减少一次系统调用
-    int Set_Linger();  // close时直接发送RST报文
+    }                           // 减少一次系统调用
+    int Set_Linger();           // close时直接发送RST报文
+    int Set_GracefullyClose();  // 优雅关闭
 
    private:
     std::unique_ptr<Address> Addr_;

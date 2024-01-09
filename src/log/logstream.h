@@ -75,7 +75,7 @@ class logstream {
     void formatInteger(T);
 };
 
-class Fmt {
+class Fmt {  // : noncopyable
    public:
     template <typename T>
     Fmt(const char* fmt, T val);

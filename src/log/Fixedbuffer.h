@@ -45,7 +45,9 @@ class FixedBuffer : public Nocopy {
 
    private:
     std::unique_ptr<char[]> Buffer_;
-    std::function<void()> cookie_;
+    std::function<void()>
+        cookie_;  // 用于在 core dump
+                  // 文件中查找丢失的日志，其值为某个函数的地址；
     uint32_t Spot;
 
     const char* end() const { return std::advance(Buffer_, Length()); }

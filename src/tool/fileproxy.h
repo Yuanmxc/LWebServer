@@ -26,6 +26,8 @@ class FileProxy : public Nocopy, public Havefd {
     __off_t FileSize();
     bool IsTextFile();
 
+    void DoFadvise(int advice);  // 指定访问文件的假设，减少无效的文件cache
+
    private:
     int File_Description;
     std::unique_ptr<struct stat> stat_ = nullptr;

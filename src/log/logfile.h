@@ -12,6 +12,7 @@ namespace ws {
 
 namespace detail {
 
+// 同步日志
 class logfile : public Nocopy {
    public:
     logfile(const std::string& baseName, off_t rollSize, bool threadSafe = true,

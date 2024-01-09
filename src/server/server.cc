@@ -19,6 +19,8 @@ std::unique_ptr<Socket> Server::Server_Accept() {
 }
 
 void Server::Server_Accept(fun&& f) {
+    // accpect返回-1的情况 https://man7.org/linux/man-pages/man2/accept4.2.html
+    // 套接字被设置成非阻塞，需要一个while循环来接收
     while (1) {
         int ret = 0;
         ret = ::accept4(fd(), nullptr, nullptr,
@@ -38,9 +40,10 @@ void Server::Server_Accept(fun&& f) {
             continue;
         } else if (ret == -1) {
             // ECONNABORTED
-            // 在等待队列的时候被关闭了，不是非阻塞套及字的话会一直阻塞;
+            // 在等待队列的时候被关闭了，不是非阻塞套及字的话会一直阻塞
             break;
         } else {
+            // 这种情况理论是不会出现的；
             std::cerr
                 << "ERROR : Server::Server_Accept, unexpected situation.\n";
         }
@@ -55,6 +58,16 @@ void Server::Server_BindAndListen() {
     int para2 = listen(fd(), ::max(SOMAXCONN, 1024));
     if (para2 == -1)
         throw std::runtime_error("'Server_BindAndListen' : error in listen.");
+}
+
+inline int Server::Set_Linger() {
+    struct linger buffer_ = {1, 0};
+    return setsockopt(fd(), SOL_SOCKET, SO_LINGER, &buffer_, sizeof(buffer_));
+}
+
+inline int Server::Set_GracefullyClose() {
+    struct linger buffer_ = {1, 1};
+    return setsockopt(fd(), SOL_SOCKET, SO_LINGER, &buffer_, sizeof(buffer_));
 }
 
 int Server::Server_DeferAccept() {
