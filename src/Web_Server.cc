@@ -15,7 +15,7 @@ void setGperfStatus(int signum) {
     }
     if (!is_open) {  // start
         is_open = true;
-        ProfilerStart("test.prof");
+        ProfilerStart("PerformanceAnalysis.prof");
         std::cout << "ProfilerStart success" << std::endl;
     } else {  // stop
         is_open = false;
