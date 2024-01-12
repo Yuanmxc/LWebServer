@@ -143,11 +143,11 @@ MxcServer是使用 C++14 编写的一个在 GNU/Linux 平台上运行的的高�
 
 ### CPU 负载分析
 
-![RuningCPU.png](./assets/RuningCPU.png)
+![RuningCPU.png](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/RuningCPU.png?raw=true)
 
 从 CPU 占用可以看出除了15 号占用率较高外其他核的负载比较平均（15 号CPU占用最高达到过70%以上），这是因为这个核绑定运行 accept 线程，他需要处理一百万个总请求，有大量的 accept 和 epoll_wait。
 
-![RuningCPU.png](./assets/PerformanceAnalysis.png)
+![PerformanceAnalysis.png](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/PerformanceAnalysis.png?raw=true)
 
 从耗时来看，主要集中在开销较大的系统调用上，符合优化目的。
 
