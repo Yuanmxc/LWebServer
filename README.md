@@ -2,7 +2,7 @@
 
 ## 介绍
 
-MxcServer是使用 C++14 编写的一个在 GNU/Linux 平台上运行的的高性能 Web 服务器，能够高效地处理HTTP/1.1请求，包括静态GET、HEAD、OPTIONS 请求和 FastCGI 支持。
+MxcServer是使用 C++14 编写的一个在 GNU/Linux 平台上运行的的高性能 Web 服务器，能够高效地处理HTTP/1.1请求，包括静态 GET 请求和 FastCGI 支持。
 
 ## 主要特点
 
@@ -16,6 +16,7 @@ MxcServer是使用 C++14 编写的一个在 GNU/Linux 平台上运行的的高�
 8. 大量应用constexper，noexcept，__attribute__等机制以增加代码的优化潜能
 9. 引入**套接字slab层**，最小化内存分配，提高性能
 10. 引入全局**无锁队列**，实现基于吞吐量和每线程长连接数量的**特殊加权轮询负载均衡**算法 
+11. 实现**Fastcgi**协议与后台运行的php-fpm进行通信
 
 ## 安装与运行 
 
@@ -95,19 +96,62 @@ MxcServer是使用 C++14 编写的一个在 GNU/Linux 平台上运行的的高�
 
 ### 测试结果
 
-[测试前 CPU 占用]()，[测试中 CPU 占用]()
+[测试前 CPU 占用](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/FreeCPU.png)，[测试中 CPU 占用](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/RuningCPU.png)
 
-[性能分析结果]()
+[性能分析结果](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/PerformanceAnalysis.txt)
 
-[压力测试结果]()
+[压力测试结果](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/MxcServerTest.png)
 
-### 性能对比
+### 压力测试性能对比
 
-对比对象：Apache/2.4.58，nginx/1.24.0
+对比对象：[Apache/2.4.58](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/ApacheTest.png)，[nginx/1.24.0](https://github.com/Yuanmxc/MxcServer/blob/main/PerformanceAnalysis/NginxTest.png)
+
+总请求数：1000000，并发请求数：1000
+
+#### 部分数据对比：
+
+每秒完成的请求数（RPS）：
+
+| 服务器名称 |  值/sec  |
+| :--------: | :------: |
+|   Nginx    | 16279.06 |
+| MxcServer  | 15807.54 |
+|   Apache   | 14397.15 |
+
+每个请求花费的时间：
+
+|  服务器名称  | 值/ms |
+| :----------: | :---: |
+|    Nginx     | 0.061 |
+| RabbitServer | 0.063 |
+|    Apache    | 0.069 |
 
 
+特定时间内服务的请求百分比（毫秒）：
 
-### 性能分析
+| 百分比 | Nginx/ms | MxcServer/ms | Apache/ms |
+| :----: | :------: | :----------: | :-------: |
+|  50%   |    62    |      63      |    69     |
+|  66%   |    63    |      64      |    70     |
+|  75%   |    63    |      64      |    70     |
+|  80%   |    64    |      65      |    70     |
+|  90%   |    65    |      66      |    73     |
+|  95%   |    66    |      68      |    77     |
+|  98%   |    68    |      71      |    264    |
+|  99%   |    71    |      73      |    275    |
+|  100%  |   1091   |     169      |   1097    |
+
+### CPU 负载分析
+
+![RuningCPU.png](./assets/RuningCPU.png)
+
+从 CPU 占用可以看出除了15 号占用率较高外其他核的负载比较平均（15 号CPU占用最高达到过70%以上），这是因为这个核绑定运行 accept 线程，他需要处理一百万个总请求，有大量的 accept 和 epoll_wait。
+
+![RuningCPU.png](./assets/PerformanceAnalysis.png)
+
+从耗时来看，主要集中在开销较大的系统调用上，符合优化目的。
+
+
 
 
 
